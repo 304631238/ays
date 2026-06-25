@@ -239,18 +239,8 @@ function renderIdentity(){
   ${isAdmin()?`<button class="btn" style="margin-bottom:16px" onclick="openEdit('certs','')">+ 新增资质</button>`:''}
   ${allCerts().map(c=>`<div class="qrow">${adminBtns('certs',c.id)}<div class="q">${esc(c.t)}</div><div class="a">${esc(c.d)}</div></div>`).join("")}`;
 }
-function renderProducts(filter=""){
-  const list=allProducts().filter(p=>(p.name+p.id).toLowerCase().includes(filter.toLowerCase()));
-  return `<div class="sec-title"><span class="bar"></span>产品 / Q&amp;A</div>
-  <div class="sec-sub">店铺真实产品矩阵，支持搜索。</div>
-  <div class="toolbar">
-    <div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-    <input id="psearch" placeholder="搜索产品名称 / 编号..." value="${esc(filter)}"></div>
-    <div class="count">${list.length} 款</div>
-  </div>
-  ${isAdmin()?`<button class="btn" style="margin-bottom:16px" onclick="openEdit('products','')">+ 新增产品</button>`:''}
-  <div class="grid">${list.map(p=>`
-    <div class="card">
+function productCard(p){
+  return `<div class="card">
       <img class="thumb" src="${esc(p.img)}" loading="lazy" alt="${esc(p.name)}" onerror="this.style.opacity=.3">
       <div class="body">
         <div class="pid">${esc(p.id)}</div>
@@ -263,7 +253,30 @@ function renderProducts(filter=""){
           ${isAdmin()?`<button onclick="openEdit('products','${esc(p.id)}')">编辑</button><button class="delp" onclick="delItem('products','${esc(p.id)}')">删除</button>`:''}
         </div>
       </div>
-    </div>`).join("")}</div>`;
+    </div>`;
+}
+function productListHTML(filter=""){
+  const f=filter.toLowerCase();
+  const list=allProducts().filter(p=>((p.name||"")+(p.id||"")).toLowerCase().includes(f));
+  return {count:list.length, html:`<div class="grid">${list.map(productCard).join("")}</div>`};
+}
+function renderProducts(filter=""){
+  const r=productListHTML(filter);
+  return `<div class="sec-title"><span class="bar"></span>产品 / Q&amp;A</div>
+  <div class="sec-sub">店铺真实产品矩阵，支持搜索。${isAdmin()?'<span style="color:var(--warn)"> · 管理模式：可编辑/删除每一条</span>':''}</div>
+  <div class="toolbar">
+    <div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="psearch" placeholder="搜索产品名称 / 编号..." value="${esc(filter)}" oninput="filterProducts(this.value)"></div>
+    <div class="count" id="pcount">${r.count} 款</div>
+  </div>
+  ${isAdmin()?`<button class="btn" style="margin-bottom:16px" onclick="openEdit('products','')">+ 新增产品</button>`:''}
+  <div id="plist">${r.html}</div>`;
+}
+function filterProducts(v){
+  const r=productListHTML(v);
+  const lst=document.getElementById("plist");const cnt=document.getElementById("pcount");
+  if(lst)lst.innerHTML=r.html;
+  if(cnt)cnt.textContent=r.count+" 款";
 }
 function renderIntel(){
   return `<div class="sec-title"><span class="bar"></span>情报 / 画像</div>
@@ -271,23 +284,37 @@ function renderIntel(){
   ${isAdmin()?`<button class="btn" style="margin-bottom:16px" onclick="openEdit('intel','')">+ 新增情报</button>`:''}
   ${allIntel().map(i=>`<div class="qrow">${adminBtns('intel',i.id)}<div class="q">${esc(i.t)}</div><div class="a">${esc(i.d)}</div></div>`).join("")}`;
 }
-function renderScripts(filter=""){
-  const list=allScripts().filter(s=>(s.t+s.c+s.cat+s.id).toLowerCase().includes(filter.toLowerCase()));
-  return `<div class="sec-title"><span class="bar"></span>话术 / SOP</div>
-  <div class="sec-sub">B2B 户外地垫销售全流程话术，点复制即用。</div>
-  <div class="toolbar">
-    <div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-    <input id="ssearch" placeholder="搜索话术 / 场景 / 编号..." value="${esc(filter)}"></div>
-    <div class="count">${list.length} 条</div>
-  </div>
-  ${isAdmin()?`<button class="btn" style="margin-bottom:16px" onclick="openEdit('scripts','')">+ 新增话术</button>`:''}
-  ${list.map(s=>`<div class="qrow">
+function scriptRow(s){
+  return `<div class="qrow">
     <button class="copy" onclick="copyTxt(this.dataset.c)" data-c="${esc(s.c)}">复制</button>
     ${adminBtns('scripts',s.id)}
     <div class="q">${esc(s.id)} · ${esc(s.t)}</div>
     <div class="a">${esc(s.c)}</div>
     <div class="meta">场景：${esc(s.cat||'-')}</div>
-  </div>`).join("")}`;
+  </div>`;
+}
+function scriptListHTML(filter=""){
+  const f=filter.toLowerCase();
+  const list=allScripts().filter(s=>((s.t||"")+(s.c||"")+(s.cat||"")+(s.id||"")).toLowerCase().includes(f));
+  return {count:list.length, html:list.map(scriptRow).join("")};
+}
+function renderScripts(filter=""){
+  const r=scriptListHTML(filter);
+  return `<div class="sec-title"><span class="bar"></span>话术 / SOP</div>
+  <div class="sec-sub">B2B 户外地垫销售全流程话术，点复制即用。${isAdmin()?'<span style="color:var(--warn)"> · 管理模式：可编辑/删除每一条</span>':''}</div>
+  <div class="toolbar">
+    <div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="ssearch" placeholder="搜索话术 / 场景 / 编号..." value="${esc(filter)}" oninput="filterScripts(this.value)"></div>
+    <div class="count" id="scount">${r.count} 条</div>
+  </div>
+  ${isAdmin()?`<button class="btn" style="margin-bottom:16px" onclick="openEdit('scripts','')">+ 新增话术</button>`:''}
+  <div id="slist">${r.html}</div>`;
+}
+function filterScripts(v){
+  const r=scriptListHTML(v);
+  const lst=document.getElementById("slist");const cnt=document.getElementById("scount");
+  if(lst)lst.innerHTML=r.html;
+  if(cnt)cnt.textContent=r.count+" 条";
 }
 function renderBrand(){
   return `<div class="sec-title"><span class="bar"></span>品牌资产</div>
@@ -447,8 +474,6 @@ function show(t){
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.t===t));
   const fn=VIEWS[t]||renderHome;
   document.getElementById("main").innerHTML=fn();
-  if(t==="products"){const i=document.getElementById("psearch");if(i)i.addEventListener("input",e=>{const v=e.target.value;document.getElementById("main").innerHTML=renderProducts(v);const ni=document.getElementById("psearch");ni.focus();ni.setSelectionRange(v.length,v.length);});}
-  if(t==="scripts"){const i=document.getElementById("ssearch");if(i)i.addEventListener("input",e=>{const v=e.target.value;document.getElementById("main").innerHTML=renderScripts(v);const ni=document.getElementById("ssearch");ni.focus();ni.setSelectionRange(v.length,v.length);});}
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
