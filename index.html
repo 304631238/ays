@@ -293,14 +293,14 @@ function renderBrand(){
 /* ===== RENDER: SCRIPTS ===== */
 function scriptRow(s){
   return `<div class="qrow">
-    <button class="copy" onclick="copyTxt(this.dataset.c)" data-c="${esc(s.c)}">${T('copy')}</button>
+    <button class="copy" onclick="copyTxt(this.dataset.c)" data-c="${esc(L(s.c))}">${T('copy')}</button>
     ${adminBtns('scripts',s.id)}
     <div class="q">${esc(s.id)} · ${esc(L(s.t))}</div>
-    <div class="a">${esc(s.c)}</div>
+    <div class="a">${esc(L(s.c))}</div>
     <div class="meta">${LANG==='zh'?'场景':'Scene'}: ${esc(L(s.cat))}</div>
   </div>`;
 }
-function scriptListHTML(f=""){f=f.toLowerCase();const list=allScripts().filter(s=>(bothLang(s.t)+" "+s.c+" "+bothLang(s.cat)+" "+s.id).toLowerCase().includes(f));return{count:list.length,html:list.map(scriptRow).join("")};}
+function scriptListHTML(f=""){f=f.toLowerCase();const list=allScripts().filter(s=>(bothLang(s.t)+" "+bothLang(s.c)+" "+bothLang(s.cat)+" "+s.id).toLowerCase().includes(f));return{count:list.length,html:list.map(scriptRow).join("")};}
 function renderScripts(filter=""){
   const r=scriptListHTML(filter);
   return `<div class="sec-title"><span class="bar"></span>${T('scripts')} <span style="font-size:12px;color:var(--warn)">(${LANG==='zh'?'内部资料':'Internal only'})</span></div>
@@ -444,7 +444,7 @@ const SCHEMA={
   scripts:{title:{en:"Script",zh:"话术"},idp:"S",fields:[
     {k:"cat",t:"bl",label:{en:"Scene",zh:"场景分类"}},
     {k:"t",t:"bl",label:{en:"Title",zh:"标题"},req:1},
-    {k:"c",t:"s",label:{en:"Content",zh:"内容"},area:1},
+    {k:"c",t:"bl",label:{en:"Content",zh:"内容"},area:1},
   ]},
   intel:{title:{en:"Intel",zh:"情报"},idp:"I",fields:[
     {k:"t",t:"bl",label:{en:"Title",zh:"标题"},req:1},
