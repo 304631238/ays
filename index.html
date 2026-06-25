@@ -332,7 +332,7 @@ function renderProducts(filter=""){
           ${p.url?`<a href="${p.url}" target="_blank">查看详情</a>`:''}
           <button onclick="copyTxt(\`${esc(p.name)}\`)">复制名称</button>
         </div>
-        <div class="note"><textarea placeholder="产品备注（卖点/价格底线/客户偏好...）" data-note="${p.id}">${esc(NOTES[p.id]||'')}</textarea></div>
+        ${IS_ADMIN?`<div class="note"><textarea placeholder="产品备注（卖点/价格底线/客户偏好...）" data-note="${p.id}">${esc(NOTES[p.id]||'')}</textarea></div>`:''}
       </div>
     </div>`).join("")}</div>`;
 }
@@ -454,9 +454,18 @@ function addCert(){
 function delManual(type,i){MANUAL[type].splice(i,1);saveManual(MANUAL);toast("已删除");show('settings');}
 function clearAll(){if(confirm("确定清空全部手动新增内容？系统自带内容不受影响。")){MANUAL={products:[],scripts:[],intel:[],certs:[]};saveManual(MANUAL);toast("已清空");show('settings');}}
 
+/* ============ ADMIN MODE ============ */
+/* 管理员模式：链接带 ?admin=1 才显示「网站设置」。对外公开链接（不带参数）为纯净只读版。 */
+const IS_ADMIN = /[?&]admin=1\b/.test(location.search);
+(function setupAdmin(){
+  const sBtn=document.querySelector('#nav button[data-t="settings"]');
+  if(sBtn && !IS_ADMIN) sBtn.style.display="none";
+})();
+
 /* ============ ROUTER ============ */
 const VIEWS={home:renderHome,identity:renderIdentity,products:renderProducts,intel:renderIntel,scripts:renderScripts,brand:renderBrand,settings:renderSettings};
 function show(t){
+  if(t==="settings" && !IS_ADMIN){t="home";}
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.t===t));
   main.innerHTML=VIEWS[t]();
   document.querySelectorAll("section").forEach(s=>s.classList.add("show"));
