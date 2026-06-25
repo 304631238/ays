@@ -141,6 +141,9 @@
   </div>
 </div>
 
+<!-- 编辑/新增弹窗 -->
+<div class="modal" id="editModal"></div>
+
 <footer id="footer">爱以思公司知识库 · 数据来源 aiyisi.en.alibaba.com</footer>
 
 <script>
@@ -182,19 +185,18 @@ async function loadDB(){
     return false;
   }
   // 兜底字段
-  DB.manual=DB.manual||{products:[],scripts:[],intel:[],certs:[]};
-  DB.notes=DB.notes||{};
+  DB.products=DB.products||[];DB.scripts=DB.scripts||[];
+  DB.intel=DB.intel||[];DB.certs=DB.certs||[];DB.brand=DB.brand||[];
   return true;
 }
-function allProducts(){return (DB.products||[]).concat(DB.manual.products||[])}
-function allScripts(){return (DB.scripts||[]).concat(DB.manual.scripts||[])}
-function allIntel(){return (DB.intel||[]).concat(DB.manual.intel||[])}
-function allCerts(){return (DB.certs||[]).concat(DB.manual.certs||[])}
+function allProducts(){return DB.products}
+function allScripts(){return DB.scripts}
+function allIntel(){return DB.intel}
+function allCerts(){return DB.certs}
 
 /* ===================== NAV ===================== */
 function buildNav(){
   const tabs=[["home","首页"],["identity","身份/资质"],["products","产品/Q&A"],["intel","情报/画像"],["scripts","话术/SOP"],["brand","品牌资产"]];
-  if(isAdmin()) tabs.push(["settings","网站设置"]);
   const nav=document.getElementById("nav");
   nav.innerHTML=tabs.map(([t,l])=>`<button data-t="${t}">${l}</button>`).join("")
     + (IS_ADMIN_URL && !isAdmin()?`<button data-t="login" style="color:var(--warn)">🔒 后台登录</button>`:"")
@@ -226,10 +228,16 @@ function renderHome(){
     <p style="margin-top:14px;color:var(--txt2);font-size:13px">数据来源：<a href="${esc(C.url)}" target="_blank">${esc(C.url)}</a></p>
   </div>`;
 }
+function adminBtns(type,id){
+  if(!isAdmin())return "";
+  return `<button class="copy" style="background:var(--chip)" onclick="openEdit('${type}','${esc(id)}')">编辑</button>`+
+         `<button class="delq" onclick="delItem('${type}','${esc(id)}')">删除</button>`;
+}
 function renderIdentity(){
   return `<div class="sec-title"><span class="bar"></span>身份 / 资质</div>
-  <div class="sec-sub">公司认证、贸易保障与定制能力。</div>
-  ${allCerts().map(c=>`<div class="qrow"><div class="q">${esc(c.t)}</div><div class="a">${esc(c.d)}</div></div>`).join("")}`;
+  <div class="sec-sub">公司认证、贸易保障与定制能力。${isAdmin()?'<span style="color:var(--warn)"> · 管理模式：可编辑/删除每一条</span>':''}</div>
+  ${isAdmin()?`<button class="btn" style="margin-bottom:16px" onclick="openEdit('certs','')">+ 新增资质</button>`:''}
+  ${allCerts().map(c=>`<div class="qrow">${adminBtns('certs',c.id)}<div class="q">${esc(c.t)}</div><div class="a">${esc(c.d)}</div></div>`).join("")}`;
 }
 function renderProducts(filter=""){
   const list=allProducts().filter(p=>(p.name+p.id).toLowerCase().includes(filter.toLowerCase()));
@@ -240,26 +248,28 @@ function renderProducts(filter=""){
     <input id="psearch" placeholder="搜索产品名称 / 编号..." value="${esc(filter)}"></div>
     <div class="count">${list.length} 款</div>
   </div>
+  ${isAdmin()?`<button class="btn" style="margin-bottom:16px" onclick="openEdit('products','')">+ 新增产品</button>`:''}
   <div class="grid">${list.map(p=>`
     <div class="card">
       <img class="thumb" src="${esc(p.img)}" loading="lazy" alt="${esc(p.name)}" onerror="this.style.opacity=.3">
       <div class="body">
-        <div class="pid">${esc(p.id)}${p.manual?' · 新增':''}</div>
+        <div class="pid">${esc(p.id)}</div>
         <div class="name">${esc(p.name)}</div>
         <div class="price">${esc(p.price||'询价')}</div>
         <div class="moq">起订量：${esc(p.moq||'-')}</div>
         <div class="acts">
           ${p.url?`<a href="${esc(p.url)}" target="_blank">查看详情</a>`:''}
           <button onclick="copyTxt(this.dataset.n)" data-n="${esc(p.name)}">复制名称</button>
-          ${isAdmin()&&p.manual?`<button class="delp" onclick="delItem('products','${esc(p.id)}')">删除</button>`:''}
+          ${isAdmin()?`<button onclick="openEdit('products','${esc(p.id)}')">编辑</button><button class="delp" onclick="delItem('products','${esc(p.id)}')">删除</button>`:''}
         </div>
       </div>
     </div>`).join("")}</div>`;
 }
 function renderIntel(){
   return `<div class="sec-title"><span class="bar"></span>情报 / 画像</div>
-  <div class="sec-sub">客户结构、市场画像、采购决策关键词。</div>
-  ${allIntel().map((i,idx)=>`<div class="qrow">${isAdmin()&&i.manual?`<button class="delq" onclick="delItem('intel','${idx}')">删除</button>`:''}<div class="q">${esc(i.t)}</div><div class="a">${esc(i.d)}</div></div>`).join("")}`;
+  <div class="sec-sub">客户结构、市场画像、采购决策关键词。${isAdmin()?'<span style="color:var(--warn)"> · 管理模式：可编辑/删除每一条</span>':''}</div>
+  ${isAdmin()?`<button class="btn" style="margin-bottom:16px" onclick="openEdit('intel','')">+ 新增情报</button>`:''}
+  ${allIntel().map(i=>`<div class="qrow">${adminBtns('intel',i.id)}<div class="q">${esc(i.t)}</div><div class="a">${esc(i.d)}</div></div>`).join("")}`;
 }
 function renderScripts(filter=""){
   const list=allScripts().filter(s=>(s.t+s.c+s.cat+s.id).toLowerCase().includes(filter.toLowerCase()));
@@ -270,60 +280,112 @@ function renderScripts(filter=""){
     <input id="ssearch" placeholder="搜索话术 / 场景 / 编号..." value="${esc(filter)}"></div>
     <div class="count">${list.length} 条</div>
   </div>
+  ${isAdmin()?`<button class="btn" style="margin-bottom:16px" onclick="openEdit('scripts','')">+ 新增话术</button>`:''}
   ${list.map(s=>`<div class="qrow">
     <button class="copy" onclick="copyTxt(this.dataset.c)" data-c="${esc(s.c)}">复制</button>
-    ${isAdmin()&&s.manual?`<button class="delq" onclick="delItem('scripts','${esc(s.id)}')">删除</button>`:''}
+    ${adminBtns('scripts',s.id)}
     <div class="q">${esc(s.id)} · ${esc(s.t)}</div>
     <div class="a">${esc(s.c)}</div>
-    <div class="meta">场景：${esc(s.cat)}${s.manual?' · 新增':''}</div>
+    <div class="meta">场景：${esc(s.cat||'-')}</div>
   </div>`).join("")}`;
 }
 function renderBrand(){
   return `<div class="sec-title"><span class="bar"></span>品牌资产</div>
-  <div class="sec-sub">品牌定位、核心品类、市场与背书。</div>
-  ${(DB.brand||[]).map(b=>`<div class="qrow"><div class="q">${esc(b.t)}</div><div class="a">${esc(b.d)}</div></div>`).join("")}`;
+  <div class="sec-sub">品牌定位、核心品类、市场与背书。${isAdmin()?'<span style="color:var(--warn)"> · 管理模式：可编辑/删除每一条</span>':''}</div>
+  ${isAdmin()?`<button class="btn" style="margin-bottom:16px" onclick="openEdit('brand','')">+ 新增品牌项</button>`:''}
+  ${(DB.brand||[]).map(b=>`<div class="qrow">${adminBtns('brand',b.id)}<div class="q">${esc(b.t)}</div><div class="a">${esc(b.d)}</div></div>`).join("")}`;
 }
-function manualList(type,arr,fields){
-  if(!arr||!arr.length) return `<div class="empty">暂无新增内容</div>`;
-  return arr.map((it)=>`<div class="manual-item">
-    <div class="mi-body"><b>${esc(it[fields[0]]||'(无标题)')}</b><br>${esc((it[fields[1]]||'').slice(0,160))}${(it[fields[1]]||'').length>160?'...':''}</div>
-    <button class="del" onclick="delItem('${type}','${esc(it.id!==undefined?it.id:arr.indexOf(it))}')">删除</button>
-  </div>`).join("");
-}
-function renderSettings(){
-  const m=DB.manual;
-  return `<div class="sec-title"><span class="bar"></span>网站设置 <span style="font-size:13px;color:var(--warn)">（管理模式 · 改动会同步到公开链接）</span></div>
-  <div class="sec-sub">在这里新增/删除的内容会写入服务器，所有访问公开链接的客户都能看到最新版本。</div>
-  <div class="panel"><h3>① 新增产品</h3>
-    <div class="field"><label>产品名称 *</label><input id="np_name" placeholder="如：New PP Reversible Outdoor Rug 8x10"></div>
-    <div class="field"><label>价格（可选）</label><input id="np_price" placeholder="如：$6.5-9.0"></div>
-    <div class="field"><label>起订量（可选）</label><input id="np_moq" placeholder="如：200 pieces"></div>
-    <div class="field"><label>图片链接（可选）</label><input id="np_img" placeholder="https://...jpg"></div>
-    <div class="field"><label>详情链接（可选）</label><input id="np_url" placeholder="https://www.alibaba.com/product-detail/..."></div>
-    <button class="btn" onclick="addProduct()">保存产品</button>
-  </div>
-  <div class="panel"><h3>② 新增话术</h3>
-    <div class="field"><label>场景分类</label><input id="ns_cat" placeholder="如：报价 / 催单 / 售后"></div>
-    <div class="field"><label>话术标题 *</label><input id="ns_title" placeholder="如：大客户专属折扣话术"></div>
-    <div class="field"><label>话术内容</label><textarea id="ns_content" placeholder="输入话术正文..."></textarea></div>
-    <button class="btn" onclick="addScript()">保存话术</button>
-  </div>
-  <div class="panel"><h3>③ 新增客户情报 / 画像</h3>
-    <div class="field"><label>标题 *</label><input id="ni_title" placeholder="如：德国买家偏好"></div>
-    <div class="field"><label>内容</label><textarea id="ni_content" placeholder="输入情报内容..."></textarea></div>
-    <button class="btn" onclick="addIntel()">保存情报</button>
-  </div>
-  <div class="panel"><h3>④ 新增资质 / 背书</h3>
-    <div class="field"><label>标题 *</label><input id="nc_title" placeholder="如：BSCI 认证"></div>
-    <div class="field"><label>内容</label><textarea id="nc_content" placeholder="输入资质内容..."></textarea></div>
-    <button class="btn" onclick="addCert()">保存资质</button>
-  </div>
-  <div class="panel"><h3>已新增内容（可删除，均已同步服务器）</h3>
-    <p style="color:var(--txt2);font-size:13px;margin-bottom:10px">产品（${m.products.length}）</p>${manualList('products',m.products,['name','price'])}
-    <p style="color:var(--txt2);font-size:13px;margin:14px 0 10px">话术（${m.scripts.length}）</p>${manualList('scripts',m.scripts,['t','c'])}
-    <p style="color:var(--txt2);font-size:13px;margin:14px 0 10px">情报（${m.intel.length}）</p>${manualList('intel',m.intel,['t','d'])}
-    <p style="color:var(--txt2);font-size:13px;margin:14px 0 10px">资质（${m.certs.length}）</p>${manualList('certs',m.certs,['t','d'])}
+/* ===================== EDIT SCHEMA ===================== */
+/* 每种类型的字段定义：key=数据字段, label=显示名, type=input/textarea, required, placeholder, idprefix */
+const SCHEMA={
+  products:{title:"产品",idprefix:"AY",fields:[
+    {k:"name",label:"产品名称",type:"input",required:true,ph:"如：New PP Reversible Outdoor Rug 8x10"},
+    {k:"price",label:"价格",type:"input",ph:"如：$6.5-9.0"},
+    {k:"moq",label:"起订量",type:"input",ph:"如：200 pieces"},
+    {k:"img",label:"图片链接",type:"input",ph:"https://...jpg"},
+    {k:"url",label:"详情链接",type:"input",ph:"https://www.alibaba.com/product-detail/..."}
+  ]},
+  scripts:{title:"话术",idprefix:"S",fields:[
+    {k:"cat",label:"场景分类",type:"input",ph:"如：报价 / 催单 / 售后"},
+    {k:"t",label:"话术标题",type:"input",required:true,ph:"如：大客户专属折扣话术"},
+    {k:"c",label:"话术内容",type:"textarea",ph:"输入话术正文..."}
+  ]},
+  intel:{title:"情报",idprefix:"I",fields:[
+    {k:"t",label:"标题",type:"input",required:true,ph:"如：德国买家偏好"},
+    {k:"d",label:"内容",type:"textarea",ph:"输入情报内容..."}
+  ]},
+  certs:{title:"资质",idprefix:"C",fields:[
+    {k:"t",label:"标题",type:"input",required:true,ph:"如：BSCI 认证"},
+    {k:"d",label:"内容",type:"textarea",ph:"输入资质内容..."}
+  ]},
+  brand:{title:"品牌项",idprefix:"B",fields:[
+    {k:"t",label:"标题",type:"input",required:true,ph:"如：品牌口号"},
+    {k:"d",label:"内容",type:"textarea",ph:"输入内容..."}
+  ]}
+};
+let EDIT_TYPE=null, EDIT_ID=null;
+
+function openEdit(type,id){
+  if(!isAdmin())return;
+  EDIT_TYPE=type;EDIT_ID=id;
+  const sc=SCHEMA[type];
+  const item=id?DB[type].find(x=>String(x.id)===String(id)):{};
+  const isNew=!id;
+  const html=`<div class="box" style="max-height:88vh;overflow:auto">
+    <h3>${isNew?'新增':'编辑'}${sc.title}</h3>
+    <p>${isNew?'填写后保存，将同步到公开链接。':'修改后保存，将同步到公开链接，客户刷新即见。'}</p>
+    ${sc.fields.map(f=>`<div class="field"><label>${f.label}${f.required?' *':''}</label>${
+      f.type==="textarea"
+        ?`<textarea id="ef_${f.k}" placeholder="${esc(f.ph||'')}">${esc((item&&item[f.k])||"")}</textarea>`
+        :`<input id="ef_${f.k}" placeholder="${esc(f.ph||'')}" value="${esc((item&&item[f.k])||"")}">`
+    }</div>`).join("")}
+    <div style="display:flex;gap:10px;margin-top:6px">
+      <button class="btn" id="editSaveBtn" onclick="saveEdit()">保存</button>
+      <button class="btn btn-ghost" onclick="closeEdit()">取消</button>
+    </div>
   </div>`;
+  const modal=document.getElementById("editModal");
+  modal.innerHTML=html;modal.classList.add("show");
+  setTimeout(()=>{const e=document.querySelector('#editModal [id^="ef_"]');if(e)e.focus();},100);
+}
+function closeEdit(){const m=document.getElementById("editModal");m.classList.remove("show");m.innerHTML="";EDIT_TYPE=EDIT_ID=null;}
+
+async function saveEdit(){
+  const type=EDIT_TYPE,sc=SCHEMA[type];
+  const obj={};
+  for(const f of sc.fields){
+    const el=document.getElementById("ef_"+f.k);
+    const v=el?el.value.trim():"";
+    if(f.required && !v)return toast("请填写「"+f.label+"」",true);
+    obj[f.k]=v;
+  }
+  // 产品图兜底
+  if(type==="products" && !obj.img) obj.img="https://img.alicdn.com/imgextra/i1/O1CN01YyMrnH1TH65JNfJZU_!!6000000002356-2-tps-600-600.png";
+  const btn=document.getElementById("editSaveBtn");if(btn){btn.disabled=true;btn.textContent="保存中…";}
+  let msg;
+  if(EDIT_ID){ // 编辑
+    const it=DB[type].find(x=>String(x.id)===String(EDIT_ID));
+    Object.assign(it,obj);
+    msg="Edit "+type+": "+(obj.t||obj.name||EDIT_ID);
+  }else{ // 新增
+    obj.id=uid(sc.idprefix+"-M");
+    DB[type].push(obj);
+    msg="Add "+type+": "+(obj.t||obj.name||obj.id);
+  }
+  const ok=await saveDB(msg);
+  if(ok){closeEdit();const cur=document.querySelector("#nav button.active");show(cur?cur.dataset.t:"home");}
+  else{if(btn){btn.disabled=false;btn.textContent="保存";}}
+}
+
+async function delItem(type,id){
+  if(!isAdmin())return;
+  if(!confirm("确定删除这条内容？删除后客户也将看不到。"))return;
+  const arr=DB[type];
+  const idx=arr.findIndex(x=>String(x.id)===String(id));
+  if(idx<0)return toast("未找到该条目",true);
+  const removed=arr.splice(idx,1)[0];
+  if(await saveDB("Delete "+type+": "+id)){const cur=document.querySelector("#nav button.active");show(cur?cur.dataset.t:"home");}
+  else{arr.splice(idx,0,removed);}
 }
 
 /* ===================== WRITE BACK TO GITHUB ===================== */
@@ -355,40 +417,6 @@ async function saveDB(commitMsg){
 
 function uid(prefix){return prefix+Date.now().toString(36)+Math.floor(Math.random()*900+100)}
 
-async function addProduct(){
-  const name=val("np_name");if(!name)return toast("请填写产品名称",true);
-  DB.manual.products.push({id:uid("AY-M"),name,price:val("np_price"),moq:val("np_moq"),
-    img:val("np_img")||"https://img.alicdn.com/imgextra/i1/O1CN01YyMrnH1TH65JNfJZU_!!6000000002356-2-tps-600-600.png",
-    url:val("np_url"),manual:true});
-  if(await saveDB("Add product: "+name)) show("settings");
-}
-async function addScript(){
-  const t=val("ns_title");if(!t)return toast("请填写话术标题",true);
-  DB.manual.scripts.push({id:uid("S-M"),cat:val("ns_cat")||"自定义",t,c:val("ns_content"),manual:true});
-  if(await saveDB("Add script: "+t)) show("settings");
-}
-async function addIntel(){
-  const t=val("ni_title");if(!t)return toast("请填写标题",true);
-  DB.manual.intel.push({id:uid("I-M"),t,d:val("ni_content"),manual:true});
-  if(await saveDB("Add intel: "+t)) show("settings");
-}
-async function addCert(){
-  const t=val("nc_title");if(!t)return toast("请填写标题",true);
-  DB.manual.certs.push({id:uid("C-M"),t,d:val("nc_content"),manual:true});
-  if(await saveDB("Add cert: "+t)) show("settings");
-}
-async function delItem(type,id){
-  if(!confirm("确定删除这条内容？删除后客户也将看不到。"))return;
-  const arr=DB.manual[type];
-  let idx=arr.findIndex(x=>String(x.id)===String(id));
-  if(idx<0 && /^\d+$/.test(id)) idx=parseInt(id); // 兼容无id情报
-  if(idx<0||idx>=arr.length)return toast("未找到该条目",true);
-  const removed=arr.splice(idx,1);
-  if(await saveDB("Delete "+type)){ const cur=document.querySelector("#nav button.active");show(cur?cur.dataset.t:"settings"); }
-  else { arr.splice(idx,0,removed[0]); } // 失败回滚
-}
-function val(id){const e=document.getElementById(id);return e?e.value.trim():""}
-
 /* ===================== LOGIN ===================== */
 function openLogin(){document.getElementById("loginModal").classList.add("show");setTimeout(()=>{const i=document.getElementById("tokenInput");if(i)i.focus();},100)}
 function closeLogin(){document.getElementById("loginModal").classList.remove("show")}
@@ -402,8 +430,8 @@ async function doLogin(){
     const j=await r.json();
     if(!j.permissions||!j.permissions.push)throw new Error("该令牌没有写入权限");
     localStorage.setItem(LS_TOKEN,tk);
-    closeLogin();toast("登录成功，已进入管理模式");
-    buildNav();show("settings");
+    closeLogin();toast("登录成功，已进入管理模式，每页可直接编辑/删除");
+    buildNav();show("products");
   }catch(e){toast("登录失败："+e.message,true)}
 }
 function logout(){localStorage.removeItem(LS_TOKEN);toast("已退出管理模式");buildNav();show("home");}
@@ -412,11 +440,10 @@ function logout(){localStorage.removeItem(LS_TOKEN);toast("已退出管理模式
 function copyTxt(t){navigator.clipboard.writeText(t).then(()=>toast("已复制")).catch(()=>toast("复制失败",true))}
 
 /* ===================== ROUTER ===================== */
-const VIEWS={home:renderHome,identity:renderIdentity,products:renderProducts,intel:renderIntel,scripts:renderScripts,brand:renderBrand,settings:renderSettings};
+const VIEWS={home:renderHome,identity:renderIdentity,products:renderProducts,intel:renderIntel,scripts:renderScripts,brand:renderBrand};
 function show(t){
   if(t==="login"){openLogin();return}
   if(t==="logout"){logout();return}
-  if(t==="settings" && !isAdmin()){t="home";}
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.t===t));
   const fn=VIEWS[t]||renderHome;
   document.getElementById("main").innerHTML=fn();
