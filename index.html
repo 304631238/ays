@@ -169,13 +169,13 @@ function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace
 function toast(m,e){const t=document.getElementById("toast");t.textContent=m;t.className="toast show"+(e?" err":"");setTimeout(()=>t.className="toast",e?3200:1800)}
 // 取双语字段：值可能是 {en,zh} 或纯字符串
 function L(v){if(v&&typeof v==="object")return v[LANG]||v.en||v.zh||"";return v||""}
-/* 阿里国际站标准年限算法：今年 - 成立年 + 1
- * 2014 成立 → 2026 显示 12 年(与阿里店铺标识一致)
+/* 阿里国际站标准年限算法：当前年份 - 成立年份(只比较年份，不看月日)
+ * 2014 成立 → 2026 显示 12 YRS(与阿里店铺 12YRS 标识完全一致)
  * 每年自然年元旦自动 +1 */
 function yearsSince(iso){
   if(!iso)return 0;
   const s=new Date(iso),n=new Date();
-  const y=n.getFullYear()-s.getFullYear()+1;
+  const y=n.getFullYear()-s.getFullYear();
   return Math.max(0,y);
 }
 function dynamicYears(C){
