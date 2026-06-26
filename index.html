@@ -113,19 +113,28 @@
   .speceditrow{display:flex;gap:8px;margin-bottom:8px}
   .speceditrow input{flex:1}
   .speceditrow .rm{background:var(--danger);color:#fff;border:none;border-radius:7px;padding:0 12px;cursor:pointer}
-  /* === Hero 大图区(YETI 风) === */
+  /* === Hero 轮播大图区(YETI 风) === */
   .yhero{position:relative;width:100vw;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;margin-top:-26px;margin-bottom:40px;height:560px;overflow:hidden;background:#0F2C4D}
-  .yhero img{width:100%;height:100%;object-fit:cover;opacity:.88}
-  .yhero .overlay{position:absolute;inset:0;background:linear-gradient(to right, rgba(15,44,77,.75) 0%, rgba(15,44,77,.45) 50%, rgba(15,44,77,.15) 100%);display:flex;align-items:center}
-  .yhero .inner{max-width:1240px;margin:0 auto;padding:0 22px;width:100%;color:#fff}
-  .yhero .kicker{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#3fc88c;font-weight:700;margin-bottom:14px}
-  .yhero h1{font-size:54px;line-height:1.1;font-weight:800;margin-bottom:18px;max-width:760px;letter-spacing:-1px}
-  .yhero .sub{font-size:18px;max-width:600px;opacity:.92;line-height:1.5;margin-bottom:24px}
+  .yhero .slide{position:absolute;inset:0;opacity:0;transition:opacity 1s ease}
+  .yhero .slide.on{opacity:1}
+  .yhero .slide img{width:100%;height:100%;object-fit:cover;opacity:.88}
+  .yhero .overlay{position:absolute;inset:0;background:linear-gradient(to right, rgba(15,44,77,.75) 0%, rgba(15,44,77,.45) 50%, rgba(15,44,77,.15) 100%);display:flex;align-items:center;pointer-events:none}
+  .yhero .inner{max-width:1240px;margin:0 auto;padding:0 22px;width:100%;color:#fff;pointer-events:auto}
+  .yhero .kicker{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#3fc88c;font-weight:700;margin-bottom:14px;transition:opacity .4s}
+  .yhero h1{font-size:54px;line-height:1.1;font-weight:800;margin-bottom:18px;max-width:760px;letter-spacing:-1px;transition:opacity .4s}
+  .yhero .sub{font-size:18px;max-width:600px;opacity:.92;line-height:1.5;margin-bottom:24px;transition:opacity .4s}
   .yhero .cta{display:inline-flex;gap:12px;flex-wrap:wrap}
   .yhero .cta a{padding:14px 30px;border-radius:6px;font-weight:700;font-size:15px;text-decoration:none;transition:.2s;cursor:pointer}
   .yhero .cta .primary{background:#D62828;color:#fff}.yhero .cta .primary:hover{background:#b81f1f}
   .yhero .cta .ghost{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.6)}.yhero .cta .ghost:hover{background:rgba(255,255,255,.1)}
-  @media(max-width:768px){.yhero{height:420px}.yhero h1{font-size:32px}.yhero .sub{font-size:15px}}
+  /* 轮播控件 */
+  .yhero .nav-arrow{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;z-index:5;transition:.2s;backdrop-filter:blur(8px)}
+  .yhero .nav-arrow:hover{background:rgba(255,255,255,.3)}
+  .yhero .nav-arrow.prev{left:20px} .yhero .nav-arrow.next{right:20px}
+  .yhero .dots{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:5}
+  .yhero .dots .dot{width:34px;height:4px;border-radius:2px;background:rgba(255,255,255,.4);cursor:pointer;transition:.2s;border:none;padding:0}
+  .yhero .dots .dot.on{background:#fff;width:48px}
+  @media(max-width:768px){.yhero{height:460px}.yhero h1{font-size:30px}.yhero .sub{font-size:14px}.yhero .nav-arrow{width:38px;height:38px;font-size:16px}}
   /* === 数据成就横条 === */
   .ystats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:40px}
   .ystats .s{background:var(--panel);padding:26px 18px;text-align:center}
@@ -315,13 +324,46 @@ function buildNav(){
 }
 
 /* ===== RENDER: HOME ===== */
+/* ===== HERO 轮播控制 ===== */
+let HERO_SLIDES_DATA=[],HERO_IDX=0,HERO_TIMER=null;
+function heroSet(i){
+  if(!HERO_SLIDES_DATA.length)return;
+  HERO_IDX=(i+HERO_SLIDES_DATA.length)%HERO_SLIDES_DATA.length;
+  const s=HERO_SLIDES_DATA[HERO_IDX];
+  document.querySelectorAll(".yhero .slide").forEach((el,idx)=>el.classList.toggle("on",idx===HERO_IDX));
+  document.querySelectorAll(".yhero .dot").forEach((el,idx)=>el.classList.toggle("on",idx===HERO_IDX));
+  const k=document.getElementById("hero-kicker"),t=document.getElementById("hero-title"),u=document.getElementById("hero-sub");
+  if(k){k.style.opacity=0;t.style.opacity=0;u.style.opacity=0;
+    setTimeout(()=>{k.textContent=s.kicker;t.textContent=s.title;u.textContent=s.sub;k.style.opacity=1;t.style.opacity=1;u.style.opacity=1;},300);}
+}
+function heroGo(d){heroSet(HERO_IDX+d);heroResetAuto();}
+function heroResetAuto(){if(HERO_TIMER)clearInterval(HERO_TIMER);HERO_TIMER=setInterval(()=>heroSet(HERO_IDX+1),5500);}
+function heroStartAuto(slides){HERO_SLIDES_DATA=slides;HERO_IDX=0;heroResetAuto();}
+function heroStopAuto(){if(HERO_TIMER){clearInterval(HERO_TIMER);HERO_TIMER=null;}HERO_SLIDES_DATA=[];}
+
 function renderHome(){
   const C=DB.company;
   const yrs=yearsSince(C.foundedDate||"");
   // 取前 3 款带图的产品作为产品分类入口
   const sampleProds=allProducts().filter(p=>p.images&&p.images[0]).slice(0,3);
   const ZH=LANG==='zh';
-  const HERO_IMG="https://sc02.alicdn.com/kf/A4b151d010d3f47e9b17525400d6390d2B.png";
+  // Hero 轮播：3 张图 + 各自标语
+  const HERO_SLIDES=[
+    {img:"https://sc02.alicdn.com/kf/A4b151d010d3f47e9b17525400d6390d2B.png",
+     kicker:ZH?"12 年金牌工厂 · 服务全球零售巨头":"12-Year Gold Factory · Serving Global Retail Giants",
+     title:ZH?"户外 PP 编织地垫专业制造商":"Outdoor PP Woven Rug Manufacturer",
+     sub:ZH?"专注双面可逆户外地垫 ODM 12 年，TÜV 认证，25,000m² 厂区，服务 Aldi · Lidl · The Home Depot · K-mart 等欧美连锁零售商。":"Specializing in reversible recycled-PP outdoor rugs for 12 years. TÜV certified, 25,000 m² plant. Trusted ODM partner of Aldi, Lidl, The Home Depot and K-mart."},
+    {img:"https://sc02.alicdn.com/kf/A14359234953b4731ae5384770a741268Q.png",
+     kicker:ZH?"双面可逆 · 防水抗UV · 环保再生 PP":"Reversible · Waterproof · Recycled PP",
+     title:ZH?"专注双面可逆 RV 房车垫 12 年":"12 Years of Reversible RV Mats",
+     sub:ZH?"再生聚丙烯材质，双面双图案，可水洗、防霉、抗UV、轻便折叠。北美 RV 露营市场首选 ODM 供应商。":"Recycled PP material with reversible double-pattern design. Washable, mildew-resistant, UV-stable and lightweight. The preferred ODM supplier for the North American RV market."},
+    {img:"https://sc02.alicdn.com/kf/A1cb1c311a0684e48961b50f6952b210dw.png",
+     kicker:ZH?"25,000m² 厂区 · 200+ 套先进设备":"25,000m² Plant · 200+ Modern Machines",
+     title:ZH?"工厂自有产能 · 全工艺覆盖":"In-House Manufacturing · Full Process Coverage",
+     sub:ZH?"机织 + 提花 + 绞编全工艺自有产能，100% 准时发货，≤3h 询盘响应，96.39% 快速回复率。":"In-house woven, jacquard and braided production capacity. 100% on-time delivery, ≤3h inquiry response and 96.39% quick reply rate."},
+  ];
+  // 渲染后由 show() 启动轮播
+  window.__pendingHero=HERO_SLIDES;
   // 客户 Logo wikimedia 直链(海外稳定)
   // 客户 Logo: 多备选 URL 兜底，最后 fallback 到文字 Logo
   const LOGOS_TRUSTED=[
@@ -344,18 +386,21 @@ function renderHome(){
     </div>`;
   }
   return `
-  <!-- HERO -->
-  <section class="yhero">
-    <img src="${HERO_IMG}" alt="">
+  <!-- HERO 轮播 -->
+  <section class="yhero" id="yhero">
+    ${HERO_SLIDES.map((s,i)=>`<div class="slide ${i===0?'on':''}" data-i="${i}"><img src="${s.img}" alt=""></div>`).join("")}
     <div class="overlay"><div class="inner">
-      <div class="kicker">${ZH?'12 年金牌工厂 · 服务全球零售巨头':'12-Year Gold Factory · Serving Global Retail Giants'}</div>
-      <h1>${ZH?'户外 PP 编织地垫专业制造商':'Outdoor PP Woven Rug Manufacturer'}</h1>
-      <p class="sub">${ZH?'专注双面可逆户外地垫 ODM 12 年，TÜV 认证，25,000m² 厂区，服务 Aldi · Lidl · The Home Depot · K-mart 等欧美连锁零售商。':'Specializing in reversible recycled-PP outdoor rugs for 12 years. TÜV certified, 25,000 m² plant. Trusted ODM partner of Aldi, Lidl, The Home Depot and K-mart.'}</p>
+      <div class="kicker" id="hero-kicker">${esc(HERO_SLIDES[0].kicker)}</div>
+      <h1 id="hero-title">${esc(HERO_SLIDES[0].title)}</h1>
+      <p class="sub" id="hero-sub">${esc(HERO_SLIDES[0].sub)}</p>
       <div class="cta">
         <a class="primary" onclick="show('products')">${ZH?'浏览产品目录':'Browse Catalog'}</a>
         <a class="ghost" onclick="show('cases')">${ZH?'查看合作案例':'View Cases'}</a>
       </div>
     </div></div>
+    <button class="nav-arrow prev" onclick="heroGo(-1)">‹</button>
+    <button class="nav-arrow next" onclick="heroGo(1)">›</button>
+    <div class="dots">${HERO_SLIDES.map((_,i)=>`<button class="dot ${i===0?'on':''}" data-i="${i}" onclick="heroSet(${i})"></button>`).join("")}</div>
   </section>
 
   <!-- 数据成就横条 -->
@@ -808,12 +853,16 @@ const VIEWS={home:renderHome,identity:renderIdentity,products:renderProducts,int
 function render(){
   if(CUR==="detail"){document.getElementById("main").innerHTML=renderDetail();return;}
   const fn=VIEWS[CUR]||renderHome;document.getElementById("main").innerHTML=fn();
+  if(CUR==="home" && window.__pendingHero){heroStartAuto(window.__pendingHero);window.__pendingHero=null;}
 }
 function show(t){
   if(t==="login"){openLogin();return}if(t==="logout"){logout();return}
   if(t==="stafflogin"){openStaffLogin();return}if(t==="stafflogout"){staffLogout();return}
   if((t==="intel"||t==="scripts")&&!canViewInternal())t="home";
-  CUR=t;buildNav();render();window.scrollTo({top:0,behavior:"smooth"});
+  heroStopAuto(); // 离开 home 停止轮播
+  CUR=t;buildNav();render();
+  if(t==="home" && window.__pendingHero){heroStartAuto(window.__pendingHero);window.__pendingHero=null;}
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
 /* ===== INIT ===== */
