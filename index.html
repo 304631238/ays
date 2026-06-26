@@ -230,11 +230,9 @@
   @media(max-width:800px){.ps-preview-wrap{grid-template-columns:1fr}}
   .ps-preview-col,.ps-spec-col{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
   .ps-preview{position:relative;background:linear-gradient(135deg,#e8eef3,#d4dce5);border-radius:12px;padding:24px;min-height:280px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-  .ps-rug{position:relative;width:100%;max-width:520px;aspect-ratio:8/10;background:#fafafa;border:8px solid #1a1a1a;border-radius:4px;box-shadow:0 18px 40px rgba(0,0,0,.22),0 6px 14px rgba(0,0,0,.15);overflow:hidden}
-  .ps-rug-inner{position:absolute;inset:6px;background-color:#f5f5f0;background-size:cover;background-position:center}
-  .ps-rug-inner.loaded{background-color:transparent}
-  .ps-rug[data-weave="flat"] .ps-rug-inner::after{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0,rgba(255,255,255,.05) 1px,transparent 1px,transparent 3px),repeating-linear-gradient(90deg,rgba(0,0,0,.06) 0,rgba(0,0,0,.06) 1px,transparent 1px,transparent 3px);pointer-events:none;mix-blend-mode:multiply}
-  .ps-rug[data-weave="hollow"] .ps-rug-inner::after{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.18) 0,rgba(0,0,0,.18) 2px,transparent 2px,transparent 6px);pointer-events:none;mix-blend-mode:multiply;opacity:.6}
+  .ps-rug{position:relative;width:100%;max-width:520px;aspect-ratio:8/10;background:#e5e5e0;border-radius:4px;box-shadow:0 18px 40px rgba(0,0,0,.22),0 6px 14px rgba(0,0,0,.15);overflow:hidden}
+  .ps-rug canvas{display:block;width:100%;height:100%}
+  .ps-rug-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.7);color:var(--accent);font-size:12px;font-weight:700;letter-spacing:1px;z-index:2;backdrop-filter:blur(2px)}
   .ps-rug-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--txt2);font-size:13px;font-weight:600;text-align:center;padding:30px;pointer-events:none}
   .ps-rug-tag{position:absolute;top:10px;right:10px;background:rgba(15,44,77,.92);color:#fff;font-size:11px;font-weight:700;padding:5px 10px;border-radius:6px;letter-spacing:.5px;backdrop-filter:blur(4px)}
   .ps-spec{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:18px}
@@ -778,7 +776,8 @@ function renderBrand(){  // 保留函数名，路由不变
       <div class="ps-step-h">${T('psPreview')}</div>
       <div class="ps-preview" id="psPreview">
         <div class="ps-rug" id="psRug">
-          <div class="ps-rug-inner" id="psRugInner"></div>
+          <canvas id="psCanvas" width="800" height="1000"></canvas>
+          <div class="ps-rug-loading" id="psRugLoading" style="display:none">Rendering…</div>
         </div>
         <div class="ps-rug-empty" id="psRugEmpty">${T('psPlaceholder')}</div>
         <div class="ps-rug-tag" id="psRugTag">8 × 10 ft</div>
@@ -796,31 +795,173 @@ function renderBrand(){  // 保留函数名，路由不变
 
 /* === Pattern Studio 交互 === */
 let PS_STATE={img:"",pid:"",size:"8x10",weave:"flat"};
-function psApply(){
-  const inner=document.getElementById("psRugInner");
+/* 材质母本（自托管在仓库，避免外链 CORS） */
+const PS_TEXTURES={
+  flat: "textures/flat_straw.png",   // 扁平 PP 草编（斜向 twill）
+  hollow: "textures/hollow_tube.jpg" // 中空 PP 圆管（粗管立体）
+};
+const PS_TEX_CACHE={}; // 已加载的 Image 缓存
+function psLoadTexture(url){
+  return new Promise((resolve,reject)=>{
+    if(PS_TEX_CACHE[url])return resolve(PS_TEX_CACHE[url]);
+    const img=new Image();
+    img.crossOrigin="anonymous";
+    img.onload=()=>{PS_TEX_CACHE[url]=img;resolve(img);};
+    img.onerror=e=>reject(new Error("texture load fail: "+url));
+    img.src=url;
+  });
+}
+function psLoadPattern(src){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    if(/^https?:/.test(src))img.crossOrigin="anonymous";
+    img.onload=()=>resolve(img);
+    img.onerror=e=>reject(new Error("pattern load fail"));
+    img.src=src;
+  });
+}
+
+let PS_RENDER_TOKEN=0;
+async function psRenderCanvas(){
+  const cv=document.getElementById("psCanvas");
+  const loading=document.getElementById("psRugLoading");
   const empty=document.getElementById("psRugEmpty");
+  if(!cv)return;
+  const sz=PS_SIZES.find(s=>s.id===PS_STATE.size)||PS_SIZES[1];
+  // 画布尺寸按真实比例（W=800 固定，H 按比例）
+  const W=800, H=Math.round(800/sz.ratio);
+  cv.width=W; cv.height=H;
+  const ctx=cv.getContext("2d");
+  ctx.clearRect(0,0,W,H);
+  if(!PS_STATE.img){
+    if(empty)empty.style.display="flex";
+    return;
+  }
+  if(empty)empty.style.display="none";
+  if(loading)loading.style.display="flex";
+  const token=++PS_RENDER_TOKEN;
+  try{
+    const isFlat = PS_STATE.weave==="flat";
+    const texUrl = PS_TEXTURES[PS_STATE.weave] || PS_TEXTURES.flat;
+    // 草编款留白框给"黑色加固包边带"
+    const borderW = isFlat ? Math.round(W*0.025) : 0; // 草编 2.5% 包边
+    const cx=borderW, cy=borderW, cw=W-2*borderW, ch=H-2*borderW;
+
+    // ===== 1. 客户图案打底 (cover 裁切到 content 区域) =====
+    let pat;
+    try{ pat=await psLoadPattern(PS_STATE.img); }
+    catch(e){ ctx.fillStyle="#888"; ctx.fillRect(cx,cy,cw,ch); ctx.fillStyle="#fff"; ctx.font="bold 16px sans-serif"; ctx.textAlign="center"; ctx.fillText("⚠ Pattern load failed (CORS?)",W/2,H/2); if(loading)loading.style.display="none"; return; }
+    if(token!==PS_RENDER_TOKEN)return;
+    // cover-fit
+    const pr=pat.width/pat.height, cr=cw/ch;
+    let sw,sh,sx,sy;
+    if(pr>cr){ sh=pat.height; sw=Math.round(sh*cr); sx=(pat.width-sw)/2; sy=0; }
+    else{ sw=pat.width; sh=Math.round(sw/cr); sx=0; sy=(pat.height-sh)/2; }
+    ctx.drawImage(pat, sx,sy,sw,sh, cx,cy,cw,ch);
+
+    // ===== 2. 真实材质叠加（multiply + overlay 双层）=====
+    let tex;
+    try{ tex=await psLoadTexture(texUrl); }
+    catch(e){ console.warn("texture failed, fallback to plain pattern",e); }
+    if(token!==PS_RENDER_TOKEN)return;
+    if(tex){
+      // 用离屏 canvas 把材质平铺到 content 区域
+      const off=document.createElement("canvas");
+      off.width=cw; off.height=ch;
+      const oc=off.getContext("2d");
+      // 平铺（草编母本 1024px → 在 cw 范围里铺 1-2 次保持纹理粗细可见）
+      const tileScale = isFlat ? 1.1 : 0.9; // 圆管放大些，更立体
+      const tw=Math.round(tex.width*tileScale), th=Math.round(tex.height*tileScale);
+      // 多次平铺
+      for(let y=0;y<ch;y+=th){
+        for(let x=0;x<cw;x+=tw){
+          oc.drawImage(tex,x,y,tw,th);
+        }
+      }
+      // 草编：multiply 让花色被编织凹凸"陷进去"
+      ctx.save();
+      ctx.globalCompositeOperation="multiply";
+      ctx.globalAlpha=isFlat?0.85:0.78;
+      ctx.drawImage(off,cx,cy,cw,ch);
+      ctx.restore();
+      // 再叠一层 overlay 提亮高光（圆管立体感来源）
+      ctx.save();
+      ctx.globalCompositeOperation="overlay";
+      ctx.globalAlpha=isFlat?0.45:0.62;
+      ctx.drawImage(off,cx,cy,cw,ch);
+      ctx.restore();
+    }
+
+    // ===== 3. 编织凹凸光影（强化材质方向感）=====
+    if(isFlat){
+      // 草编：斜向细网 + 整体微噪
+      ctx.save();
+      ctx.globalAlpha=0.12;
+      ctx.strokeStyle="rgba(0,0,0,.5)";
+      ctx.lineWidth=1;
+      for(let i=-ch;i<cw;i+=4){
+        ctx.beginPath();ctx.moveTo(cx+i,cy);ctx.lineTo(cx+i+ch,cy+ch);ctx.stroke();
+      }
+      ctx.restore();
+    } else {
+      // 圆管：横向粗管高光
+      ctx.save();
+      ctx.globalAlpha=0.18;
+      for(let y=cy;y<cy+ch;y+=10){
+        const grad=ctx.createLinearGradient(0,y,0,y+10);
+        grad.addColorStop(0,"rgba(255,255,255,.45)");
+        grad.addColorStop(0.5,"rgba(0,0,0,0)");
+        grad.addColorStop(1,"rgba(0,0,0,.35)");
+        ctx.fillStyle=grad;
+        ctx.fillRect(cx,y,cw,10);
+      }
+      ctx.restore();
+    }
+
+    // ===== 4. 草编款：黑色加固折边 + 白色平行缝线（贴 SOUL 铁律）=====
+    if(isFlat){
+      // 黑色折边
+      ctx.fillStyle="#0d0d0d";
+      ctx.fillRect(0,0,W,borderW);
+      ctx.fillRect(0,H-borderW,W,borderW);
+      ctx.fillRect(0,0,borderW,H);
+      ctx.fillRect(W-borderW,0,borderW,H);
+      // 内边白色平行缝线（双线）
+      ctx.strokeStyle="rgba(255,255,255,.85)";
+      ctx.lineWidth=Math.max(1,borderW*0.06);
+      ctx.setLineDash([Math.max(3,borderW*0.18),Math.max(2,borderW*0.12)]);
+      const o1=borderW*0.35, o2=borderW*0.65;
+      ctx.strokeRect(o1,o1,W-2*o1,H-2*o1);
+      ctx.strokeRect(o2,o2,W-2*o2,H-2*o2);
+      ctx.setLineDash([]);
+      // 折边内阴影（让边带更立体）
+      const sh=ctx.createLinearGradient(0,borderW,0,borderW+8);
+      sh.addColorStop(0,"rgba(0,0,0,.35)");
+      sh.addColorStop(1,"rgba(0,0,0,0)");
+      ctx.fillStyle=sh;
+      ctx.fillRect(borderW,borderW,W-2*borderW,8);
+    } else {
+      // 圆管款：无包边，但边缘加柔和暗角
+      const vig=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.55);
+      vig.addColorStop(0,"rgba(0,0,0,0)");
+      vig.addColorStop(1,"rgba(0,0,0,.28)");
+      ctx.fillStyle=vig;
+      ctx.fillRect(0,0,W,H);
+    }
+  } finally {
+    if(loading)loading.style.display="none";
+  }
+}
+
+function psApply(){
   const rug=document.getElementById("psRug");
   const tag=document.getElementById("psRugTag");
-  if(!inner)return;
-  // 尺寸 → 比例（容器宽度固定 by CSS，aspect-ratio 控制高）
+  if(!rug)return;
   const sz=PS_SIZES.find(s=>s.id===PS_STATE.size)||PS_SIZES[1];
   rug.style.aspectRatio=sz.ratio;
-  tag.textContent=sz.label+" · "+sz.dim;
-  // 图案铺设
-  if(PS_STATE.img){
-    inner.style.backgroundImage=`url("${PS_STATE.img}")`;
-    inner.style.backgroundSize="cover";
-    inner.style.backgroundPosition="center";
-    inner.style.backgroundRepeat="no-repeat";
-    inner.classList.add("loaded");
-    empty.style.display="none";
-  }else{
-    inner.style.backgroundImage="";
-    inner.classList.remove("loaded");
-    empty.style.display="flex";
-  }
-  // 工艺切换 → 不同纹理叠加（伪 noise）
-  rug.dataset.weave=PS_STATE.weave;
+  if(tag)tag.textContent=sz.label+" · "+sz.dim;
+  // 异步合成
+  psRenderCanvas();
   // 参数表
   const w=PS_WEAVES.find(x=>x.id===PS_STATE.weave)||PS_WEAVES[0];
   const spec=w.spec;
