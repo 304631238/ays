@@ -295,8 +295,8 @@ const I18N={
   intel:{en:"Intel",zh:"情报/画像"},
   scripts:{en:"Scripts",zh:"话术/SOP"},
   brand:{en:"Brand",zh:"品牌资产"},
-  cases:{en:"Cases",zh:"合作案例"},
-  addCase:{en:"+ Add case",zh:"+ 新增案例"},
+  cases:{en:"Partner Brands",zh:"合作品牌"},
+  addCase:{en:"+ Add brand",zh:"+ 新增合作品牌"},
   fairs:{en:"Trade Show Records",zh:"参展记录"},
   fairEditions:{en:"Edition Records",zh:"参展届次"},
   addEdition:{en:"+ Add edition",zh:"+ 新增参展记录"},
@@ -577,7 +577,7 @@ function renderBrand(){
 function renderCases(){
   const cs=DB.cases||[];
   return `<div class="sec-title"><span class="bar"></span>${T('cases')}</div>
-  <div class="sec-sub">${LANG==='zh'?'服务过的客户与合作案例。':'Customers we serve & cooperation cases.'}${isAdmin()?T('adminTip'):''}</div>
+  <div class="sec-sub">${LANG==='zh'?'与全球零售品牌的长期合作。':'Long-term partnerships with global retail brands.'}${isAdmin()?T('adminTip'):''}</div>
   ${isAdmin()?`<button class="btn" style="margin-bottom:16px" onclick="openEdit('cases','')">${T('addCase')}</button>`:''}
   <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
   ${cs.map(c=>`<div class="card" style="cursor:default">
