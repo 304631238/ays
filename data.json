@@ -75,8 +75,8 @@
         "zh": "TÜV Rheinland 认证"
       },
       "d": {
-        "en": "Supplier certified by TÜV Rheinland (the 'by TÜVRheinland' mark on the store homepage).",
-        "zh": "由 TÜV Rheinland 颁发的供应商认证（店铺首页 by TÜVRheinland 标识）。"
+        "en": "Officially certified supplier by TÜV Rheinland Germany. Verifiable on TÜV Certipedia.",
+        "zh": "由德国 TÜV Rheinland 颁发的官方供应商认证。可在 TÜV Certipedia 官方平台查询验证。"
       },
       "verify": {
         "url": "https://www.certipedia.com/",
@@ -8133,7 +8133,7 @@
       }
     }
   ],
-  "_updated": "2026-06-26T11:40:20.119703+00:00",
+  "_updated": "2026-06-26T11:42:50.194232+00:00",
   "_schema": "v4-full-bilingual",
   "cases": [
     {
