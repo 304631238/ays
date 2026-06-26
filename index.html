@@ -34,6 +34,9 @@
     nav.open{display:flex}
     nav button{text-align:left;padding:12px 14px;border-radius:8px;width:100%}
     nav .langtoggle{margin:8px 0 0 0;align-self:flex-start}
+    nav .langdropdown{margin:8px 0 0 0;align-self:flex-start;width:100%}
+    nav .langdropdown .langbtn{width:100%;justify-content:space-between;padding:12px 14px}
+    nav .langmenu{left:0;right:0}
     nav .adminbadge{align-self:flex-start;margin:8px 0}
     .top{flex-wrap:wrap}
     .brand h1{font-size:14px}
@@ -44,6 +47,21 @@
   .langtoggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-left:4px}
   .langtoggle button{padding:6px 11px;border-radius:0;font-size:13px;border:none}
   .langtoggle button.on{background:var(--accent);color:#fff;font-weight:700}
+  /* === 语言下拉菜单（替代 langtoggle） === */
+  .langdropdown{position:relative;margin-left:6px}
+  .langbtn{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:13px;color:var(--txt);font-weight:600;transition:.15s}
+  .langbtn:hover{border-color:var(--accent)}
+  .langbtn .lf{font-size:15px;line-height:1}
+  .langbtn .lc{color:var(--txt2);font-size:11px;margin-left:2px;transition:transform .15s}
+  .langdropdown.open .langbtn .lc{transform:rotate(180deg)}
+  .langdropdown.open .langbtn{border-color:var(--accent)}
+  .langmenu{display:none;position:absolute;top:calc(100% + 6px);right:0;min-width:160px;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 12px 32px rgba(0,0,0,.18);z-index:50}
+  .langdropdown.open .langmenu{display:block}
+  .langmenu button{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;background:transparent;border:none;color:var(--txt);font-size:13px;cursor:pointer;text-align:left;font-weight:500;transition:background .12s}
+  .langmenu button:hover{background:var(--panel2)}
+  .langmenu button.on{background:rgba(31,111,191,.08);color:var(--accent);font-weight:700}
+  .langmenu .lf{font-size:16px;line-height:1}
+  .langmenu .lk{margin-left:auto;color:var(--accent);font-weight:800}
   .adminbadge{font-size:11px;padding:3px 9px;border-radius:20px;background:var(--warn);color:#1a1206;font-weight:700}
   main{max-width:1240px;margin:0 auto;padding:26px 22px 80px;min-height:50vh}
   .hero{background:linear-gradient(135deg,#16241c,#1a2129);border:1px solid var(--line);border-radius:18px;padding:32px;box-shadow:var(--shadow);margin-bottom:24px}
@@ -546,12 +564,17 @@ function buildNav(){
   if(canViewInternal()){tabs.push(["intel",T("intel")],["scripts",T("scripts")]);}
   const nav=document.getElementById("nav");
   let html=tabs.map(([t,l])=>`<button data-t="${t}" class="${CUR===t?'active':''}">${l}</button>`).join("");
-  html+=`<div class="langtoggle">`
-    +`<button class="${LANG==='en'?'on':''}" onclick="setLang('en')" title="English">EN</button>`
-    +`<button class="${LANG==='zh'?'on':''}" onclick="setLang('zh')" title="中文">中</button>`
-    +`<button class="${LANG==='de'?'on':''}" onclick="setLang('de')" title="Deutsch">DE</button>`
-    +`<button class="${LANG==='es'?'on':''}" onclick="setLang('es')" title="Español">ES</button>`
-    +`</div>`;
+  // 语言切换：折叠下拉菜单（节省空间 + 国际站标准做法）
+  const LANG_LABELS={en:{flag:"🇺🇸",name:"English"},zh:{flag:"🇨🇳",name:"中文"},de:{flag:"🇩🇪",name:"Deutsch"},es:{flag:"🇪🇸",name:"Español"}};
+  const cur=LANG_LABELS[LANG]||LANG_LABELS.en;
+  html+=`<div class="langdropdown" id="langDropdown">
+    <button class="langbtn" onclick="event.stopPropagation();document.getElementById('langDropdown').classList.toggle('open')">
+      <span class="lf">${cur.flag}</span><span class="ln">${cur.name}</span><span class="lc">▾</span>
+    </button>
+    <div class="langmenu">
+      ${["en","zh","de","es"].map(l=>{const m=LANG_LABELS[l];return `<button class="${LANG===l?'on':''}" onclick="setLang('${l}');document.getElementById('langDropdown').classList.remove('open')"><span class="lf">${m.flag}</span><span class="ln">${m.name}</span>${LANG===l?'<span class="lk">✓</span>':''}</button>`;}).join("")}
+    </div>
+  </div>`;
   if(IS_ADMIN_URL && !isAdmin()) html+=`<button data-t="login" style="color:var(--warn)">${T('login')}</button>`;
   if(isAdmin()) html+=`<span class="adminbadge">${T('adminmode')}</span><button data-t="logout" style="color:var(--txt2)">${T('logout')}</button>`;
   if(IS_STAFF_URL && !isStaff() && !isAdmin()) html+=`<button data-t="stafflogin" style="color:var(--warn)">${T('staffLogin')}</button>`;
@@ -2058,6 +2081,11 @@ function show(t){
   document.documentElement.lang=({en:"en",zh:"zh-CN",de:"de",es:"es"})[LANG]||"en";
   buildNav();
   document.getElementById("nav").addEventListener("click",e=>{if(e.target.dataset.t)show(e.target.dataset.t)});
+  // 点击空白处关闭语言下拉
+  document.addEventListener("click",e=>{
+    const d=document.getElementById("langDropdown");
+    if(d && d.classList.contains("open") && !d.contains(e.target)) d.classList.remove("open");
+  });
   CUR="home";render();
   if(IS_ADMIN_URL && !isAdmin())openLogin();
   else if(IS_STAFF_URL && !isStaff())openStaffLogin();
