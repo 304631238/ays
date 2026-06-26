@@ -6,14 +6,19 @@
 <title>AIYISI · Outdoor Rug Catalog</title>
 <style>
   :root{
-    --bg:#0f1419;--panel:#1a2129;--panel2:#222c36;--line:#2d3a47;
-    --txt:#e8eef3;--txt2:#9fb0c0;--accent:#2f9e6e;--accent2:#3fc88c;
-    --warn:#d98a2b;--danger:#c14b4b;--chip:#283642;--shadow:0 8px 30px rgba(0,0,0,.35);
+    /* === 方案A：白底 + Logo蓝主色 + Logo红强调（与品牌 Logo 一致） === */
+    --bg:#ffffff;--panel:#ffffff;--panel2:#F5F8FB;--line:#E1E7EE;
+    --txt:#1A2433;--txt2:#5A6B7C;
+    --accent:#1F6FBF;     /* Logo 蓝 - 主色（按钮/链接/品牌色） */
+    --accent2:#2E89D9;    /* Logo 蓝亮 - 强调数字/Hover */
+    --brand-red:#D62828;  /* Logo 红 - CTA/促销强调 */
+    --warn:#D97706;--danger:#D62828;
+    --chip:#EEF2F7;--shadow:0 4px 20px rgba(31,111,191,.08);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;-webkit-font-smoothing:antialiased}
   a{color:var(--accent2);text-decoration:none}
-  header{position:sticky;top:0;z-index:50;background:rgba(15,20,25,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);box-shadow:0 1px 8px rgba(0,0,0,.04)}
   .top{max-width:1240px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
   .brand{display:flex;align-items:center;gap:12px}
   .brand .logo{width:56px;height:42px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--line)}
@@ -23,10 +28,10 @@
   nav{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto;align-items:center}
   nav button{background:transparent;border:1px solid transparent;color:var(--txt2);padding:8px 13px;border-radius:9px;cursor:pointer;font-size:14px;transition:.2s}
   nav button:hover{color:var(--txt);background:var(--panel)}
-  nav button.active{color:#06140d;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:700}
+  nav button.active{color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:700}
   .langtoggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-left:4px}
   .langtoggle button{padding:6px 11px;border-radius:0;font-size:13px;border:none}
-  .langtoggle button.on{background:var(--accent);color:#06140d;font-weight:700}
+  .langtoggle button.on{background:var(--accent);color:#fff;font-weight:700}
   .adminbadge{font-size:11px;padding:3px 9px;border-radius:20px;background:var(--warn);color:#1a1206;font-weight:700}
   main{max-width:1240px;margin:0 auto;padding:26px 22px 80px;min-height:50vh}
   .hero{background:linear-gradient(135deg,#16241c,#1a2129);border:1px solid var(--line);border-radius:18px;padding:32px;box-shadow:var(--shadow);margin-bottom:24px}
@@ -48,7 +53,7 @@
   .card .moq{font-size:12px;color:var(--txt2)}
   .card .acts{display:flex;gap:8px;margin-top:auto;padding-top:8px}
   .card .acts button{flex:1;text-align:center;font-size:12px;padding:7px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);cursor:pointer}
-  .card .acts button:hover{background:var(--accent);color:#06140d}
+  .card .acts button:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
   .card .acts .delp{background:var(--danger);color:#fff;border-color:var(--danger)}
   .vbadge{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.65);color:#fff;font-size:11px;padding:3px 8px;border-radius:6px}
   .toolbar{display:flex;gap:12px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
@@ -74,7 +79,7 @@
   .field label{display:block;font-size:13px;color:var(--txt2);margin-bottom:6px}
   .field input,.field textarea,.field select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--txt);padding:10px 12px;font-size:14px;font-family:inherit}
   .field textarea{min-height:80px;resize:vertical}
-  .btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#06140d;border:none;padding:11px 22px;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px}
+  .btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:11px 22px;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px}
   .btn:hover{filter:brightness(1.08)}
   .btn:disabled{opacity:.5;cursor:not-allowed}
   .btn-ghost{background:var(--chip);color:var(--txt);border:1px solid var(--line)}
@@ -99,8 +104,15 @@
   .uploadzone{border:2px dashed var(--line);border-radius:12px;padding:20px;text-align:center;color:var(--txt2);cursor:pointer;font-size:13px;transition:.2s}
   .uploadzone:hover,.uploadzone.drag{border-color:var(--accent);color:var(--accent2);background:rgba(47,158,110,.06)}
   .empty{color:var(--txt2);font-size:13px;padding:14px;text-align:center;border:1px dashed var(--line);border-radius:10px}
-  footer{text-align:center;color:var(--txt2);font-size:12px;padding:30px;border-top:1px solid var(--line)}
-  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--accent);color:#06140d;padding:12px 24px;border-radius:10px;font-weight:700;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s;z-index:99;max-width:90%}
+  /* === 页脚 === */
+  footer{background:#0F2C4D;color:#cdd5dd;font-size:13px;padding:50px 22px 24px;margin-top:60px}
+  footer .ft-wrap{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:32px;padding-bottom:30px;border-bottom:1px solid rgba(255,255,255,.1)}
+  footer .ft-col h5{color:#fff;font-size:14px;margin-bottom:14px;letter-spacing:1px;text-transform:uppercase}
+  footer .ft-col p,footer .ft-col a{color:#aab4be;font-size:13px;line-height:1.8;text-decoration:none;display:block}
+  footer .ft-col a:hover{color:#7DB8F0}
+  footer .ft-col .icon{display:inline-block;width:18px;color:#7DB8F0;font-weight:700}
+  footer .ft-bottom{max-width:1240px;margin:20px auto 0;text-align:center;color:#7a8590;font-size:12px}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:12px 24px;border-radius:10px;font-weight:700;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s;z-index:99;max-width:90%}
   .toast.show{opacity:1}
   .toast.err{background:var(--danger);color:#fff}
   .loading{text-align:center;padding:60px 20px;color:var(--txt2)}
@@ -121,7 +133,7 @@
   .yhero .slide img{width:100%;height:100%;object-fit:cover;opacity:.88}
   .yhero .overlay{position:absolute;inset:0;background:linear-gradient(to right, rgba(15,44,77,.75) 0%, rgba(15,44,77,.45) 50%, rgba(15,44,77,.15) 100%);display:flex;align-items:center;pointer-events:none}
   .yhero .inner{max-width:1240px;margin:0 auto;padding:0 22px;width:100%;color:#fff;pointer-events:auto}
-  .yhero .kicker{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#3fc88c;font-weight:700;margin-bottom:14px;transition:opacity .4s}
+  .yhero .kicker{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#7DB8F0;font-weight:700;margin-bottom:14px;transition:opacity .4s}
   .yhero h1{font-size:54px;line-height:1.1;font-weight:800;margin-bottom:18px;max-width:760px;letter-spacing:-1px;transition:opacity .4s}
   .yhero .sub{font-size:18px;max-width:600px;opacity:.92;line-height:1.5;margin-bottom:24px;transition:opacity .4s}
   .yhero .cta{display:inline-flex;gap:12px;flex-wrap:wrap}
@@ -139,7 +151,7 @@
   /* === 数据成就横条 === */
   .ystats{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:40px}
   .ystats .s{background:var(--panel);padding:24px 12px;text-align:center}
-  .ystats .s b{display:block;font-size:26px;color:#3fc88c;font-weight:800;letter-spacing:-1px;margin-bottom:6px;line-height:1.1}
+  .ystats .s b{display:block;font-size:26px;color:var(--accent);font-weight:800;letter-spacing:-1px;margin-bottom:6px;line-height:1.1}
   .ystats .s span{font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:1.2px}
   @media(max-width:900px){.ystats{grid-template-columns:repeat(3,1fr)}}
   @media(max-width:500px){.ystats{grid-template-columns:repeat(2,1fr)}}
@@ -157,7 +169,7 @@
   .ywhy{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:40px}
   .ywhy .w{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;transition:.2s}
   .ywhy .w:hover{border-color:var(--accent);transform:translateY(-3px)}
-  .ywhy .w .ic{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:22px;color:#06140d;margin-bottom:14px;font-weight:800}
+  .ywhy .w .ic{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;margin-bottom:14px;font-weight:800}
   .ywhy .w h4{font-size:15px;margin-bottom:6px;color:var(--txt)}
   .ywhy .w p{font-size:13px;color:var(--txt2);line-height:1.5}
   /* === 客户 Logo 墙 === */
@@ -204,7 +216,39 @@
   </div>
 </div>
 <div class="modal" id="editModal"></div>
-<footer id="footer">AIYISI · Outdoor Rug Catalog</footer>
+<footer id="footer">
+  <div class="ft-wrap">
+    <div class="ft-col">
+      <h5>AIYISI</h5>
+      <p>Taizhou Aiyisi Leisure Products Co., Ltd.</p>
+      <p>台州爱以思休闲用品有限公司</p>
+      <p style="margin-top:8px;color:#7a8590;font-size:12px">12-Year High-Tech ODM Factory<br>of Outdoor PP Woven Rugs</p>
+    </div>
+    <div class="ft-col">
+      <h5>Contact 联系</h5>
+      <p><span class="icon">✉</span> <a href="mailto:sales@tzaiyisi.com">sales@tzaiyisi.com</a></p>
+      <p><span class="icon">🌐</span> <a href="https://www.tzaiyisi.com" target="_blank">www.tzaiyisi.com</a></p>
+      <p><span class="icon">🛒</span> <a href="https://aiyisi.en.alibaba.com/" target="_blank">aiyisi.en.alibaba.com</a></p>
+    </div>
+    <div class="ft-col">
+      <h5>Location 地址</h5>
+      <p>Taizhou, Zhejiang, China</p>
+      <p>中国 浙江 台州</p>
+      <p style="margin-top:8px;color:#7a8590;font-size:12px">25,000 m² Factory<br>Founded Aug 26, 2014</p>
+    </div>
+    <div class="ft-col">
+      <h5>Capabilities 能力</h5>
+      <p>OEM · ODM · Private Label</p>
+      <p>FBA-friendly Packaging</p>
+      <p>TÜV / CE / BSCI Certified</p>
+      <p>9+ Patents · MOQ from 200 pcs</p>
+    </div>
+  </div>
+  <div class="ft-bottom">
+    © 2014-<span id="ft-year"></span> AIYISI · Taizhou Aiyisi Leisure Products Co., Ltd. · All rights reserved.
+  </div>
+</footer>
+<script>document.getElementById("ft-year").textContent=new Date().getFullYear();</script>
 <script>
 /* ===== CONFIG ===== */
 const GH_OWNER="tbj88",GH_REPO="ays",GH_BRANCH="main",DATA_PATH="data.json";
@@ -447,7 +491,7 @@ function renderHome(){
     <div class="w" style="grid-column:span 2;background:linear-gradient(135deg,#0F2C4D,#1a3a5e);border-color:#1F6FBF">
       <div class="ic" style="background:linear-gradient(135deg,#D62828,#ED1A3B);color:#fff">🛒</div>
       <h4 style="color:#fff;font-size:17px">${ZH?'Amazon 卖家优质供应商':'Premium Supplier for Amazon Sellers'}</h4>
-      <p style="color:rgba(255,255,255,.85);line-height:1.6;font-size:13px">${ZH?'专为亚马逊卖家定制：低 MOQ 200pcs 起订、私标包装贴牌、TÜV/CE 合规文件、研发原创花型设计、FBA 友好打包。<strong style="color:#3fc88c">12 年欧美零售品质把控 · 5.0★ 店铺评分 · 38-50% 客户复购验证</strong>——助你打造畅销爆款，远离差评困扰。':'Tailored for Amazon sellers: low MOQ from 200pcs, private-label packaging, TÜV/CE compliance docs, original pattern design, FBA-friendly packing. <strong style="color:#3fc88c">12 years of EU/US quality control · 5.0★ store rating · 38-50% repeat-order rate</strong> — helping you build best-sellers, free from bad reviews.'}</p>
+      <p style="color:rgba(255,255,255,.85);line-height:1.6;font-size:13px">${ZH?'专为亚马逊卖家定制：低 MOQ 200pcs 起订、私标包装贴牌、TÜV/CE 合规文件、研发原创花型设计、FBA 友好打包。<strong style="color:#7DB8F0">12 年欧美零售品质把控 · 5.0★ 店铺评分 · 38-50% 客户复购验证</strong>——助你打造畅销爆款，远离差评困扰。':'Tailored for Amazon sellers: low MOQ from 200pcs, private-label packaging, TÜV/CE compliance docs, original pattern design, FBA-friendly packing. <strong style="color:#7DB8F0">12 years of EU/US quality control · 5.0★ store rating · 38-50% repeat-order rate</strong> — helping you build best-sellers, free from bad reviews.'}</p>
     </div>
   </div>
 
