@@ -383,26 +383,27 @@ function renderHome(){
   // 渲染后由 show() 启动轮播
   window.__pendingHero=HERO_SLIDES;
   // 客户 Logo wikimedia 直链(海外稳定)
-  // 客户 Logo: 多备选 URL 兜底，最后 fallback 到文字 Logo
+  // 客户 Logo：自有仓库托管 /logos/，避免外链失败；图片加载失败回退品牌色文字块
   const LOGOS_TRUSTED=[
-    {name:"The Home Depot",color:"#F96302",bg:"#FFFFFF",urls:["https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/TheHomeDepot.svg/600px-TheHomeDepot.svg.png","https://logos-world.net/wp-content/uploads/2020/11/Home-Depot-Logo.png"]},
-    {name:"Lidl",color:"#0050AA",bg:"#FFE500",urls:["https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Lidl-Logo.svg/600px-Lidl-Logo.svg.png"]},
-    {name:"ALDI",color:"#FFFFFF",bg:"#00549F",urls:["https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Aldi_S%C3%BCd_2017_logo.svg/600px-Aldi_S%C3%BCd_2017_logo.svg.png"]},
-    {name:"Kmart",color:"#FFFFFF",bg:"#ED1A3B",urls:["https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Kmart_logo.svg/600px-Kmart_logo.svg.png"]},
-    {name:"METRO",color:"#FFFFFF",bg:"#003D7C",urls:["https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Logo_METRO.svg/600px-Logo_METRO.svg.png"]},
-  ];
-  const LOGOS_TARGET=[
-    {name:"COSTCO",color:"#FFFFFF",bg:"#005DAA",urls:["https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Costco_Wholesale_logo_2010-10-26.svg/600px-Costco_Wholesale_logo_2010-10-26.svg.png"]},
-    {name:"TARGET",color:"#FFFFFF",bg:"#CC0000",urls:["https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Target_logo.svg/600px-Target_logo.svg.png"]},
-    {name:"Lowe's",color:"#FFFFFF",bg:"#004990",urls:["https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Lowes_Companies_Logo.svg/600px-Lowes_Companies_Logo.svg.png"]},
+    {name:"The Home Depot",color:"#F96302",bg:"#FFFFFF",file:"homedepot"},
+    {name:"Lidl",color:"#0050AA",bg:"#FFE500",file:"lidl"},
+    {name:"ALDI",color:"#FFFFFF",bg:"#00549F",file:"aldi"},
+    {name:"Kmart",color:"#FFFFFF",bg:"#ED1A3B",file:"kmart"},
+    {name:"METRO",color:"#FFFFFF",bg:"#003D7C",file:"metro"},
   ];
   function logoBlock(l){
-    // 优先图片，加载失败显示品牌色文字块
-    return `<div class="logo-cell" style="background:${l.bg};color:${l.color};display:flex;align-items:center;justify-content:center;height:60px;border-radius:6px;font-weight:800;font-size:14px;letter-spacing:1px;position:relative;overflow:hidden">
-      <img src="${l.urls[0]}" alt="${l.name}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:8px;background:${l.bg}" onerror="this.style.display='none'">
+    return `<div class="logo-cell" style="background:${l.bg};color:${l.color};display:flex;align-items:center;justify-content:center;height:64px;border-radius:8px;font-weight:800;font-size:14px;letter-spacing:1px;position:relative;overflow:hidden">
+      <img src="logos/${l.file}.png" alt="${l.name}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:10px;background:${l.bg}" onerror="this.style.display='none'">
       <span>${l.name}</span>
     </div>`;
   }
+  // 全球区域代理招商
+  const REGIONS=[
+    {flag:"🇺🇸",en:"North America",zh:"北美地区",sub_en:"RV / Camping / Patio",sub_zh:"房车 / 露营 / 庭院市场"},
+    {flag:"🇪🇺",en:"Europe",zh:"欧洲地区",sub_en:"Garden / Home Living",sub_zh:"花园 / 家居生活市场"},
+    {flag:"🇦🇺",en:"Oceania",zh:"大洋洲地区",sub_en:"Outdoor Lifestyle",sub_zh:"户外生活方式市场"},
+    {flag:"🌍",en:"Middle East & Others",zh:"中东及其他地区",sub_en:"Premium Home Use",sub_zh:"高端家用 / 祈祷垫市场"},
+  ];
   return `
   <!-- HERO 轮播 -->
   <section class="yhero" id="yhero">
@@ -473,9 +474,19 @@ function renderHome(){
     <h3>${ZH?'我们服务过的客户':'Our Trusted Customers'}</h3>
     <div class="row">${LOGOS_TRUSTED.map(logoBlock).join("")}</div>
   </div>
-  <div class="ylogos">
-    <h3>${ZH?'我们正在寻找的合作伙伴':'Target Partners We Are Looking For'}</h3>
-    <div class="row">${LOGOS_TARGET.map(logoBlock).join("")}</div>
+  <div class="ylogos" style="background:linear-gradient(135deg,#16241c,#1a2129)">
+    <h3 style="color:#fff">${ZH?'诚招全球区域代理 / 分销合作伙伴':'Seeking Global Regional Distributors'}</h3>
+    <p style="text-align:center;color:var(--txt2);font-size:13px;margin-bottom:24px">${ZH?'加入 AIYISI 全球分销网络，共享 12 年欧美零售供应链经验':'Join the AIYISI global distribution network · 12 years of EU/US retail supply experience'}</p>
+    <div class="row" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px">
+      ${REGIONS.map(r=>`<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:20px 16px;text-align:center;transition:.2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='rgba(255,255,255,.15)'">
+        <div style="font-size:32px;margin-bottom:8px">${r.flag}</div>
+        <h4 style="color:#fff;font-size:14px;margin-bottom:4px">${ZH?r.zh:r.en}</h4>
+        <p style="color:var(--txt2);font-size:11px">${ZH?r.sub_zh:r.sub_en}</p>
+      </div>`).join("")}
+    </div>
+    <div style="text-align:center;margin-top:24px;color:var(--txt2);font-size:13px">
+      ${ZH?'有意合作请通过':'For partnership inquiries, contact us via'} <a href="${esc(DB.company.url||'#')}" target="_blank" style="color:var(--accent2);font-weight:600">Alibaba.com</a>
+    </div>
   </div>
   `;
 }
