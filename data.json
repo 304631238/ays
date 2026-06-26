@@ -8066,7 +8066,7 @@
       }
     }
   ],
-  "_updated": "2026-06-26T07:31:21.735019+00:00",
+  "_updated": "2026-06-26T10:54:12.509609+00:00",
   "_schema": "v4-full-bilingual",
   "cases": [
     {
@@ -8104,6 +8104,216 @@
         "zh": "全定制服务：客户图案、尺寸、LOGO 与贴牌包装。2 名研发工程师将买家设计转化为可量产产品。"
       },
       "img": ""
+    }
+  ],
+  "fairs": [
+    {
+      "id": "canton-fair",
+      "flag": "🇨🇳",
+      "name": {
+        "en": "Canton Fair",
+        "zh": "广交会"
+      },
+      "location": {
+        "en": "Guangzhou, China",
+        "zh": "中国 广州"
+      },
+      "subtitle": {
+        "en": "China Import and Export Fair · Pavilion 11.1/12.1",
+        "zh": "中国进出口商品交易会 · 11.1/12.1 馆"
+      },
+      "desc": {
+        "en": "AIYISI has been a continuous exhibitor at the Canton Fair for 6+ editions, with a dedicated booth in the Outdoor & Leisure pavilion. It is our most important platform to meet global buyers face-to-face every spring and autumn.",
+        "zh": "爱以思连续 6+ 届亮相广交会，常驻户外休闲品馆，是我们每年春秋两季与全球采购商面对面的核心平台。"
+      },
+      "editions": [
+        {
+          "id": "e-001",
+          "name": {
+            "en": "136th Canton Fair",
+            "zh": "第 136 届广交会"
+          },
+          "date": "2024-10-15",
+          "dateEnd": "2024-10-19",
+          "booth": "Pavilion 11.1, X-XX",
+          "note": {
+            "en": "Phase 2 · Outdoor & Leisure",
+            "zh": "第二期 · 户外休闲"
+          },
+          "photos": []
+        },
+        {
+          "id": "e-002",
+          "name": {
+            "en": "135th Canton Fair",
+            "zh": "第 135 届广交会"
+          },
+          "date": "2024-04-15",
+          "dateEnd": "2024-04-19",
+          "booth": "Pavilion 11.1",
+          "note": {
+            "en": "Spring session",
+            "zh": "春季展"
+          },
+          "photos": []
+        },
+        {
+          "id": "e-003",
+          "name": {
+            "en": "134th Canton Fair",
+            "zh": "第 134 届广交会"
+          },
+          "date": "2023-10-15",
+          "dateEnd": "2023-10-19",
+          "booth": "Pavilion 11.1",
+          "note": {
+            "en": "",
+            "zh": "秋季展"
+          },
+          "photos": []
+        },
+        {
+          "id": "e-004",
+          "name": {
+            "en": "124th Canton Fair",
+            "zh": "第 124 届广交会"
+          },
+          "date": "2018-10-15",
+          "dateEnd": "2018-10-19",
+          "booth": "Pavilion 11.1",
+          "note": {
+            "en": "",
+            "zh": "秋季展"
+          },
+          "photos": []
+        },
+        {
+          "id": "e-005",
+          "name": {
+            "en": "122nd Canton Fair",
+            "zh": "第 122 届广交会"
+          },
+          "date": "2017-10-15",
+          "dateEnd": "2017-10-19",
+          "booth": "Pavilion 11.1",
+          "note": {
+            "en": "",
+            "zh": "秋季展"
+          },
+          "photos": []
+        }
+      ]
+    },
+    {
+      "id": "spoga-gafa",
+      "flag": "🇩🇪",
+      "name": {
+        "en": "Spoga+Gafa",
+        "zh": "Spoga+Gafa"
+      },
+      "location": {
+        "en": "Cologne, Germany",
+        "zh": "德国 科隆"
+      },
+      "subtitle": {
+        "en": "World's largest outdoor & garden trade fair",
+        "zh": "全球最大户外园艺展"
+      },
+      "desc": {
+        "en": "Spoga+Gafa is the world's premier exhibition for outdoor lifestyle and garden trade. AIYISI showcases here to connect with European buyers and global distributors of outdoor textiles.",
+        "zh": "Spoga+Gafa 是全球户外生活与园艺贸易的顶级展会。爱以思在此展示新品，对接欧洲采购商与全球户外纺织品分销商。"
+      },
+      "editions": [
+        {
+          "id": "sg-001",
+          "name": {
+            "en": "Spoga+Gafa 2024",
+            "zh": "Spoga+Gafa 2024"
+          },
+          "date": "2024-06-16",
+          "dateEnd": "2024-06-18",
+          "booth": "TBD",
+          "note": {
+            "en": "Outdoor rugs new collection",
+            "zh": "户外地垫新品系列"
+          },
+          "photos": []
+        }
+      ]
+    },
+    {
+      "id": "heimtextil",
+      "flag": "🇩🇪",
+      "name": {
+        "en": "Heimtextil",
+        "zh": "Heimtextil"
+      },
+      "location": {
+        "en": "Frankfurt, Germany",
+        "zh": "德国 法兰克福"
+      },
+      "subtitle": {
+        "en": "International home & contract textiles fair",
+        "zh": "国际家纺及合约纺织品展"
+      },
+      "desc": {
+        "en": "Heimtextil in Frankfurt is the leading international trade fair for home and contract textiles. AIYISI presents its premium reversible PP woven rug collection here to global home-textile buyers.",
+        "zh": "Heimtextil 法兰克福家纺展是国际家纺与合约纺织品的顶级展会。爱以思在此向全球家纺采购商展示双面可逆 PP 编织地垫系列。"
+      },
+      "editions": [
+        {
+          "id": "ht-001",
+          "name": {
+            "en": "Heimtextil 2024",
+            "zh": "Heimtextil 2024"
+          },
+          "date": "2024-01-09",
+          "dateEnd": "2024-01-12",
+          "booth": "TBD",
+          "note": {
+            "en": "",
+            "zh": "年度国际家纺展"
+          },
+          "photos": []
+        }
+      ]
+    },
+    {
+      "id": "china-brand-au",
+      "flag": "🇦🇺",
+      "name": {
+        "en": "China Brand Fair (AU)",
+        "zh": "中国品牌澳洲展"
+      },
+      "location": {
+        "en": "Sydney/Melbourne, Australia",
+        "zh": "澳大利亚 悉尼/墨尔本"
+      },
+      "subtitle": {
+        "en": "Representing premium Chinese manufacturing",
+        "zh": "代表中国优质制造出海"
+      },
+      "desc": {
+        "en": "As a representative of premium Chinese manufacturing, AIYISI participated in the China Brand Fair held in Australia, expanding its presence in the Oceania outdoor & home market.",
+        "zh": "作为中国优质制造代表，爱以思参加在澳大利亚举办的中国品牌展，拓展大洋洲户外与家居市场。"
+      },
+      "editions": [
+        {
+          "id": "cb-001",
+          "name": {
+            "en": "China Brand Fair Australia",
+            "zh": "中国品牌澳洲展"
+          },
+          "date": "2023-09-15",
+          "dateEnd": "2023-09-18",
+          "booth": "China Pavilion",
+          "note": {
+            "en": "China premium manufacturing",
+            "zh": "中国优质制造馆"
+          },
+          "photos": []
+        }
+      ]
     }
   ]
 }
