@@ -795,10 +795,10 @@ function renderBrand(){  // 保留函数名，路由不变
 
 /* === Pattern Studio 交互 === */
 let PS_STATE={img:"",pid:"",size:"8x10",weave:"flat"};
-/* 材质母本（自托管在仓库，避免外链 CORS） */
+/* 白模母本（AI 生成的纯白 PP 编织地垫，用作"印染白模"） */
 const PS_TEXTURES={
-  flat: "textures/flat_straw.png",   // 扁平 PP 草编（斜向 twill）
-  hollow: "textures/hollow_tube.jpg" // 中空 PP 圆管（粗管立体）
+  flat: "textures/white_flat.png",     // 扁平 PP 草编白模（斜向 twill）
+  hollow: "textures/white_hollow.png"  // 中空 PP 圆管白模（粗管立体）
 };
 const PS_TEX_CACHE={}; // 已加载的 Image 缓存
 function psLoadTexture(url){
@@ -847,66 +847,64 @@ async function psRenderCanvas(){
     const borderW = isFlat ? Math.round(W*0.025) : 0; // 草编 2.5% 包边
     const cx=borderW, cy=borderW, cw=W-2*borderW, ch=H-2*borderW;
 
-    // ===== 1. 客户图案打底 (cover 裁切到 content 区域) =====
+    // ===== 1. 白模打底（白色 PP 编织地垫，作为印染基底）=====
+    let tex;
+    try{ tex=await psLoadTexture(texUrl); }
+    catch(e){ console.warn("white blank texture failed",e); }
+    if(token!==PS_RENDER_TOKEN)return;
+    if(tex){
+      // 把白模平铺到 content 区域
+      const tileScale = isFlat ? 1.0 : 0.85;
+      const tw=Math.round(tex.width*tileScale), th=Math.round(tex.height*tileScale);
+      for(let y=cy;y<cy+ch;y+=th){
+        for(let x=cx;x<cx+cw;x+=tw){
+          ctx.drawImage(tex, x, y, tw, th);
+        }
+      }
+    } else {
+      ctx.fillStyle="#f4f4f0";
+      ctx.fillRect(cx,cy,cw,ch);
+    }
+
+    // ===== 2. 客户图案 multiply 印染（白色变透明、深色印上）=====
     let pat;
     try{ pat=await psLoadPattern(PS_STATE.img); }
-    catch(e){ ctx.fillStyle="#888"; ctx.fillRect(cx,cy,cw,ch); ctx.fillStyle="#fff"; ctx.font="bold 16px sans-serif"; ctx.textAlign="center"; ctx.fillText("⚠ Pattern load failed (CORS?)",W/2,H/2); if(loading)loading.style.display="none"; return; }
+    catch(e){
+      ctx.fillStyle="rgba(200,60,60,.92)"; ctx.fillRect(cx,cy,cw,40);
+      ctx.fillStyle="#fff"; ctx.font="bold 14px sans-serif"; ctx.textAlign="center";
+      ctx.fillText("⚠ Pattern load failed (CORS or 404)", W/2, cy+25);
+      if(loading)loading.style.display="none"; return;
+    }
     if(token!==PS_RENDER_TOKEN)return;
-    // cover-fit
+    // cover-fit 客户图到 content 区域
     const pr=pat.width/pat.height, cr=cw/ch;
     let sw,sh,sx,sy;
     if(pr>cr){ sh=pat.height; sw=Math.round(sh*cr); sx=(pat.width-sw)/2; sy=0; }
     else{ sw=pat.width; sh=Math.round(sw/cr); sx=0; sy=(pat.height-sh)/2; }
+    // 关键：multiply 让白色透明、深色叠加。白模的编织凹凸自动透过客户图显示
+    ctx.save();
+    ctx.globalCompositeOperation="multiply";
+    ctx.globalAlpha=isFlat?0.95:0.93;
     ctx.drawImage(pat, sx,sy,sw,sh, cx,cy,cw,ch);
+    ctx.restore();
 
-    // ===== 2. 真实材质叠加（multiply + overlay 双层）=====
-    let tex;
-    try{ tex=await psLoadTexture(texUrl); }
-    catch(e){ console.warn("texture failed, fallback to plain pattern",e); }
-    if(token!==PS_RENDER_TOKEN)return;
-    // ===== 2. 材质轻量叠加（只暗示编织感，不压客户图）=====
+    // ===== 3. 加强编织凹凸的暗示（让图案有"陷进编织"的感觉）=====
     if(tex){
+      // 再叠一次白模的 overlay 让高光透出来
       const off=document.createElement("canvas");
       off.width=cw; off.height=ch;
       const oc=off.getContext("2d");
-      const tileScale = isFlat ? 1.1 : 0.9;
+      const tileScale = isFlat ? 1.0 : 0.85;
       const tw=Math.round(tex.width*tileScale), th=Math.round(tex.height*tileScale);
       for(let y=0;y<ch;y+=th){
         for(let x=0;x<cw;x+=tw){
           oc.drawImage(tex,x,y,tw,th);
         }
       }
-      // 只做一层 overlay 轻微光泽，让图案像"印在编织布上"
       ctx.save();
       ctx.globalCompositeOperation="overlay";
-      ctx.globalAlpha=isFlat?0.18:0.22;
+      ctx.globalAlpha=isFlat?0.32:0.42;
       ctx.drawImage(off,cx,cy,cw,ch);
-      ctx.restore();
-    }
-
-    // ===== 3. 编织凹凸光影（轻量，点到为止）=====
-    if(isFlat){
-      // 草编：极淡斜向网纹（让平面有"布纹感"）
-      ctx.save();
-      ctx.globalAlpha=0.06;
-      ctx.strokeStyle="rgba(0,0,0,.5)";
-      ctx.lineWidth=1;
-      for(let i=-ch;i<cw;i+=5){
-        ctx.beginPath();ctx.moveTo(cx+i,cy);ctx.lineTo(cx+i+ch,cy+ch);ctx.stroke();
-      }
-      ctx.restore();
-    } else {
-      // 圆管：横向粗管高光（保留立体感，权重降低）
-      ctx.save();
-      ctx.globalAlpha=0.10;
-      for(let y=cy;y<cy+ch;y+=10){
-        const grad=ctx.createLinearGradient(0,y,0,y+10);
-        grad.addColorStop(0,"rgba(255,255,255,.45)");
-        grad.addColorStop(0.5,"rgba(0,0,0,0)");
-        grad.addColorStop(1,"rgba(0,0,0,.35)");
-        ctx.fillStyle=grad;
-        ctx.fillRect(cx,y,cw,10);
-      }
       ctx.restore();
     }
 
