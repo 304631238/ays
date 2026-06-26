@@ -210,6 +210,7 @@
   .ps-tile img{width:100%;height:100%;object-fit:cover;display:block}
   .ps-tile-name{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.65);color:#fff;font-size:11px;font-weight:700;padding:5px 8px;text-align:center;line-height:1.2}
   .ps-tile-del{position:absolute;top:4px;right:4px;background:var(--danger);color:#fff;border:none;width:22px;height:22px;border-radius:50%;font-size:14px;font-weight:800;cursor:pointer;line-height:1;padding:0}
+  .ps-tile-ai{position:absolute;top:5px;left:5px;background:linear-gradient(135deg,#f7c948,#f59e0b);color:#fff;font-size:12px;padding:2px 6px;border-radius:5px;font-weight:800;box-shadow:0 2px 6px rgba(245,158,11,.5);line-height:1.2}
   .ps-tile-add{display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--panel2);border-style:dashed}
   .ps-up{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .ps-up-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:32px 16px;border:2px dashed var(--line);border-radius:10px;cursor:pointer;color:var(--txt2);font-size:13px;font-weight:600;transition:.15s;background:var(--panel2);text-align:center}
@@ -232,6 +233,7 @@
   .ps-preview{position:relative;background:linear-gradient(135deg,#e8eef3,#d4dce5);border-radius:12px;padding:24px;min-height:280px;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .ps-rug{position:relative;width:100%;max-width:520px;aspect-ratio:8/10;background:#e5e5e0;border-radius:4px;box-shadow:0 18px 40px rgba(0,0,0,.22),0 6px 14px rgba(0,0,0,.15);overflow:hidden}
   .ps-rug canvas{display:block;width:100%;height:100%}
+  .ps-rug .ps-ai-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
   .ps-rug-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.7);color:var(--accent);font-size:12px;font-weight:700;letter-spacing:1px;z-index:2;backdrop-filter:blur(2px)}
   .ps-rug-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--txt2);font-size:13px;font-weight:600;text-align:center;padding:30px;pointer-events:none}
   .ps-rug-tag{position:absolute;top:10px;right:10px;background:rgba(15,44,77,.92);color:#fff;font-size:11px;font-weight:700;padding:5px 10px;border-radius:6px;letter-spacing:.5px;backdrop-filter:blur(4px)}
@@ -488,11 +490,11 @@ async function loadDB(){
   // 如果 patterns 为空，注入 6 个预置图案（仅本地兜底显示；admin 可保存到 data.json）
   if(!DB.patterns.length){
     DB.patterns=[
-      {id:"P-001",name:{en:"Black & White Mountain",zh:"黑白山脉",de:"Berge schwarz/weiß",es:"Montaña B/N"},img:"https://sc02.alicdn.com/kf/A464ddd47ccdb427cb879c42351489e79s.png",tag:"reversible"},
+      {id:"P-001",name:{en:"Black & White Mountain",zh:"黑白山脉",de:"Berge schwarz/weiß",es:"Montaña B/N"},img:"https://sc02.alicdn.com/kf/A464ddd47ccdb427cb879c42351489e79s.png",aiPreview:"ai-previews/P-001.png",tag:"reversible"},
       {id:"P-002",name:{en:"Aztec Geometric",zh:"阿兹特克几何",de:"Azteken-Geometrie",es:"Geometría Azteca"},img:"https://sc02.alicdn.com/kf/H15b4c88f23164438be74a88921df7b5b7.jpg",tag:"bohemian"},
       {id:"P-003",name:{en:"Bohemian Mandala",zh:"波西米亚曼陀罗",de:"Böhmisches Mandala",es:"Mandala Bohemio"},img:"https://sc02.alicdn.com/kf/Ha2bf902861ff48c1908c05a6bd56e402d.jpg",tag:"round"},
       {id:"P-004",name:{en:"Quatrefoil Classic",zh:"经典四叶花",de:"Klassisches Vierpass",es:"Cuadrifolio Clásico"},img:"https://sc02.alicdn.com/kf/Abebddf8579b946d2a9189e0d99f7d002j.png",tag:"classic"},
-      {id:"P-005",name:{en:"Tropical Blue",zh:"热带蓝调",de:"Tropisches Blau",es:"Azul Tropical"},img:"https://sc02.alicdn.com/kf/A25d828adf4984d568a23cdf80e8c2a56c.png",tag:"beach"},
+      {id:"P-005",name:{en:"Tropical Blue",zh:"热带蓝调",de:"Tropisches Blau",es:"Azul Tropical"},img:"https://sc02.alicdn.com/kf/A25d828adf4984d568a23cdf80e8c2a56c.png",aiPreview:"ai-previews/P-005.png",tag:"beach"},
       {id:"P-006",name:{en:"Modern Stripes",zh:"现代条纹",de:"Moderne Streifen",es:"Rayas Modernas"},img:"https://sc02.alicdn.com/kf/A1cb1c311a0684e48961b50f6952b210dw.png",tag:"modern"},
     ];
   }
@@ -727,6 +729,7 @@ function renderBrand(){  // 保留函数名，路由不变
     <div class="ps-lib" id="psLib">
       ${patterns.map(p=>`<div class="ps-tile" data-pid="${esc(p.id)}" data-img="${esc(p.img)}" onclick="psPickLib('${esc(p.id)}')">
         <img src="${esc(p.img)}" loading="lazy" alt="${esc(L(p.name))}" onerror="this.style.opacity=.2">
+        ${p.aiPreview?`<span class="ps-tile-ai" title="AI realistic preview ready">✨</span>`:''}
         <div class="ps-tile-name">${esc(L(p.name))}</div>
         ${isAdmin()?`<button class="ps-tile-del" onclick="event.stopPropagation();delItem('patterns','${esc(p.id)}')">×</button>`:''}
       </div>`).join("")}
@@ -777,6 +780,7 @@ function renderBrand(){  // 保留函数名，路由不变
       <div class="ps-preview" id="psPreview">
         <div class="ps-rug" id="psRug">
           <canvas id="psCanvas" width="800" height="1000"></canvas>
+          <img id="psAiImg" class="ps-ai-img" alt="AI realistic preview" style="display:none">
           <div class="ps-rug-loading" id="psRugLoading" style="display:none">Rendering…</div>
         </div>
         <div class="ps-rug-empty" id="psRugEmpty">${T('psPlaceholder')}</div>
@@ -794,7 +798,7 @@ function renderBrand(){  // 保留函数名，路由不变
 }
 
 /* === Pattern Studio 交互 === */
-let PS_STATE={img:"",pid:"",size:"8x10",weave:"flat"};
+let PS_STATE={img:"",pid:"",size:"8x10",weave:"flat",aiPreview:""};
 /* 白模母本（AI 生成的纯白 PP 编织地垫，用作"印染白模"） */
 const PS_TEXTURES={
   flat: "textures/white_flat.png",     // 扁平 PP 草编白模（斜向 twill）
@@ -824,20 +828,37 @@ function psLoadPattern(src){
 let PS_RENDER_TOKEN=0;
 async function psRenderCanvas(){
   const cv=document.getElementById("psCanvas");
+  const aiImg=document.getElementById("psAiImg");
   const loading=document.getElementById("psRugLoading");
   const empty=document.getElementById("psRugEmpty");
   if(!cv)return;
   const sz=PS_SIZES.find(s=>s.id===PS_STATE.size)||PS_SIZES[1];
+  // 没有任何图 → 占位
+  if(!PS_STATE.img){
+    if(empty)empty.style.display="flex";
+    if(aiImg){aiImg.style.display="none";aiImg.src="";}
+    cv.style.display="none";
+    return;
+  }
+  if(empty)empty.style.display="none";
+  // ★ 优先路径：如果该图案配置了 AI 实景效果图，直接用 <img> 展示（永久资产）
+  if(PS_STATE.aiPreview){
+    cv.style.display="none";
+    if(aiImg){
+      aiImg.src=PS_STATE.aiPreview;
+      aiImg.style.display="block";
+    }
+    if(loading)loading.style.display="none";
+    return;
+  }
+  // 回退路径：Canvas 印染
+  if(aiImg){aiImg.style.display="none";aiImg.src="";}
+  cv.style.display="block";
   // 画布尺寸按真实比例（W=800 固定，H 按比例）
   const W=800, H=Math.round(800/sz.ratio);
   cv.width=W; cv.height=H;
   const ctx=cv.getContext("2d");
   ctx.clearRect(0,0,W,H);
-  if(!PS_STATE.img){
-    if(empty)empty.style.display="flex";
-    return;
-  }
-  if(empty)empty.style.display="none";
   if(loading)loading.style.display="flex";
   const token=++PS_RENDER_TOKEN;
   try{
@@ -981,17 +1002,17 @@ function psApply(){
 }
 function psPickLib(id){
   const p=(DB.patterns||[]).find(x=>x.id===id);if(!p)return;
-  PS_STATE.img=p.img;PS_STATE.pid=p.id;
+  PS_STATE.img=p.img;PS_STATE.pid=p.id;PS_STATE.aiPreview=p.aiPreview||"";
   document.querySelectorAll("#psLib .ps-tile").forEach(t=>t.classList.toggle("on",t.dataset.pid===id));
   psApply();
 }
 function psPickFile(input){
   const f=input.files&&input.files[0];if(!f)return;
-  const r=new FileReader();r.onload=e=>{PS_STATE.img=e.target.result;PS_STATE.pid="custom-"+Date.now();document.querySelectorAll("#psLib .ps-tile").forEach(t=>t.classList.remove("on"));psApply();};r.readAsDataURL(f);
+  const r=new FileReader();r.onload=e=>{PS_STATE.img=e.target.result;PS_STATE.pid="custom-"+Date.now();PS_STATE.aiPreview="";document.querySelectorAll("#psLib .ps-tile").forEach(t=>t.classList.remove("on"));psApply();};r.readAsDataURL(f);
 }
 function psPickUrl(v){
   v=(v||"").trim();if(!v)return;
-  PS_STATE.img=v;PS_STATE.pid="url-"+Date.now();document.querySelectorAll("#psLib .ps-tile").forEach(t=>t.classList.remove("on"));psApply();
+  PS_STATE.img=v;PS_STATE.pid="url-"+Date.now();PS_STATE.aiPreview="";document.querySelectorAll("#psLib .ps-tile").forEach(t=>t.classList.remove("on"));psApply();
 }
 function psPickSize(id){
   PS_STATE.size=id;
@@ -1354,7 +1375,8 @@ const SCHEMA={
   ]},
   patterns:{title:{en:"Pattern",zh:"图案"},idp:"P",fields:[
     {k:"name",t:"bl",label:{en:"Pattern name",zh:"图案名称"},req:1},
-    {k:"img",t:"s",label:{en:"Pattern image URL",zh:"图案图片链接"},req:1},
+    {k:"img",t:"s",label:{en:"Pattern image URL (thumbnail)",zh:"图案缩略图链接"},req:1},
+    {k:"aiPreview",t:"s",label:{en:"AI realistic preview URL (optional, leave blank to use Canvas fallback)",zh:"AI 实景效果图链接（可选，留空走 Canvas 印染）"}},
     {k:"tag",t:"s",label:{en:"Style tag (e.g. bohemian / classic / modern)",zh:"风格标签（如：bohemian / classic / modern）"}},
   ]},
   cases:{title:{en:"Case",zh:"合作案例"},idp:"CASE",fields:[
