@@ -159,17 +159,6 @@
       }
     },
     {
-      "id": "C-007",
-      "t": {
-        "en": "Customization Capability",
-        "zh": "定制能力"
-      },
-      "d": {
-        "en": "Drawing-based & sample-based customization; full OEM/ODM service.",
-        "zh": "支持图纸定制与打样定制，全定制 + ODM 服务。"
-      }
-    },
-    {
       "id": "C-008",
       "t": {
         "en": "National High-Tech Enterprise",
@@ -8133,7 +8122,7 @@
       }
     }
   ],
-  "_updated": "2026-06-26T11:42:50.194232+00:00",
+  "_updated": "2026-06-26T11:44:29.730939+00:00",
   "_schema": "v4-full-bilingual",
   "cases": [
     {
