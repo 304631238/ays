@@ -226,7 +226,228 @@
         "https://s.alicdn.com/@sc04/kf/H9b83542c1d484e2f886a9c736b2507ec1/Polypropylene-Reversible-Outdoor-RV-Rug-6x9ft-Washable.png"
       ],
       "video": "",
-      "specs": [],
+      "specs": [
+        {
+          "g": "basic",
+          "k": {
+            "en": "Material",
+            "zh": "材质"
+          },
+          "v": {
+            "en": "Polypropylene",
+            "zh": "聚丙烯"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Backing",
+            "zh": "背衬"
+          },
+          "v": {
+            "en": "Polypropylene",
+            "zh": "聚丙烯"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Feature",
+            "zh": "特性"
+          },
+          "v": {
+            "en": "Eco-Friendly, Anti-Bacteria, Washable, Reversible",
+            "zh": "环保、抗菌、可水洗、双面可逆"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Thickness",
+            "zh": "厚度"
+          },
+          "v": {
+            "en": "Thin (0.2-0.4 in.)",
+            "zh": "薄款 (0.2-0.4英寸)"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Shape",
+            "zh": "形状"
+          },
+          "v": {
+            "en": "Square",
+            "zh": "方形"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Style",
+            "zh": "风格"
+          },
+          "v": {
+            "en": "Modern",
+            "zh": "现代"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Pattern",
+            "zh": "图案"
+          },
+          "v": {
+            "en": "Abstract",
+            "zh": "抽象"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Technics",
+            "zh": "工艺"
+          },
+          "v": {
+            "en": "Woven, Jacquard, Braided, Machine Made",
+            "zh": "编织、提花、绞编、机织"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Size",
+            "zh": "尺寸"
+          },
+          "v": {
+            "en": "180x270cm / 250x300cm / 250x400cm",
+            "zh": "180x270cm / 250x300cm / 250x400cm"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Care Instructions",
+            "zh": "护理说明"
+          },
+          "v": {
+            "en": "Dry in shade",
+            "zh": "阴干"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Place of Origin",
+            "zh": "产地"
+          },
+          "v": {
+            "en": "Zhejiang, China",
+            "zh": "中国 浙江"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Brand Name",
+            "zh": "品牌"
+          },
+          "v": {
+            "en": "AIYISI",
+            "zh": "AIYISI"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Pile Height",
+            "zh": "绒高"
+          },
+          "v": {
+            "en": "Flat Pile",
+            "zh": "平绒"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Certificate",
+            "zh": "认证"
+          },
+          "v": {
+            "en": "BSCI, EN71",
+            "zh": "BSCI, EN71"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Logo",
+            "zh": "LOGO"
+          },
+          "v": {
+            "en": "Accept Customized Logo",
+            "zh": "接受定制LOGO"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Use",
+            "zh": "用途"
+          },
+          "v": {
+            "en": "Travel, Home, Picnic, Commercial, Camping",
+            "zh": "旅行、家用、野餐、商用、露营"
+          }
+        },
+        {
+          "g": "packaging",
+          "k": {
+            "en": "Selling Units",
+            "zh": "销售单位"
+          },
+          "v": {
+            "en": "Single item",
+            "zh": "单件"
+          }
+        },
+        {
+          "g": "packaging",
+          "k": {
+            "en": "Single Package Size",
+            "zh": "单件包装尺寸"
+          },
+          "v": {
+            "en": "153x37x49 cm",
+            "zh": "153x37x49 厘米"
+          }
+        },
+        {
+          "g": "packaging",
+          "k": {
+            "en": "Single Gross Weight",
+            "zh": "单件毛重"
+          },
+          "v": {
+            "en": "16.100 kg",
+            "zh": "16.100 千克"
+          }
+        },
+        {
+          "g": "packaging",
+          "k": {
+            "en": "Delivery Time",
+            "zh": "交货时间"
+          },
+          "v": {
+            "en": "31 Days",
+            "zh": "31 天"
+          }
+        }
+      ],
       "desc": {
         "en": "",
         "zh": ""
@@ -244,7 +465,239 @@
         "https://s.alicdn.com/@sc04/kf/Hea48da17c34d4bbd90cf335b7a245b1eI/9x12ft-Outdoor-RV-Mat-PP-Recycled-Mat.jpg"
       ],
       "video": "",
-      "specs": [],
+      "specs": [
+        {
+          "g": "basic",
+          "k": {
+            "en": "Material",
+            "zh": "材质"
+          },
+          "v": {
+            "en": "Polypropylene",
+            "zh": "聚丙烯"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Backing",
+            "zh": "背衬"
+          },
+          "v": {
+            "en": "Polypropylene",
+            "zh": "聚丙烯"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Feature",
+            "zh": "特性"
+          },
+          "v": {
+            "en": "Eco-Friendly, Anti-Bacteria, Washable, Reversible",
+            "zh": "环保、抗菌、可水洗、双面可逆"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Thickness",
+            "zh": "厚度"
+          },
+          "v": {
+            "en": "Thin (0.2-0.4 in.)",
+            "zh": "薄款 (0.2-0.4英寸)"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Shape",
+            "zh": "形状"
+          },
+          "v": {
+            "en": "Square",
+            "zh": "方形"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Style",
+            "zh": "风格"
+          },
+          "v": {
+            "en": "Modern",
+            "zh": "现代"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Pattern",
+            "zh": "图案"
+          },
+          "v": {
+            "en": "Abstract",
+            "zh": "抽象"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Technics",
+            "zh": "工艺"
+          },
+          "v": {
+            "en": "Woven, Jacquard, Braided, Machine Made",
+            "zh": "编织、提花、绞编、机织"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Size",
+            "zh": "尺寸"
+          },
+          "v": {
+            "en": "6x9ft(180x270cm) / 9x12ft(270x360cm)",
+            "zh": "6x9ft(180x270cm) / 9x12ft(270x360cm)"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Care Instructions",
+            "zh": "护理说明"
+          },
+          "v": {
+            "en": "Dry in shade",
+            "zh": "阴干"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Place of Origin",
+            "zh": "产地"
+          },
+          "v": {
+            "en": "Zhejiang, China",
+            "zh": "中国 浙江"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Brand Name",
+            "zh": "品牌"
+          },
+          "v": {
+            "en": "AIYISI",
+            "zh": "AIYISI"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Pile Height",
+            "zh": "绒高"
+          },
+          "v": {
+            "en": "Flat Pile",
+            "zh": "平绒"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Certificate",
+            "zh": "认证"
+          },
+          "v": {
+            "en": "BSCI, EN71",
+            "zh": "BSCI, EN71"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Logo",
+            "zh": "LOGO"
+          },
+          "v": {
+            "en": "Accept Customized Logo",
+            "zh": "接受定制LOGO"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Sample",
+            "zh": "样品"
+          },
+          "v": {
+            "en": "Support Sample Service",
+            "zh": "支持样品服务"
+          }
+        },
+        {
+          "g": "basic",
+          "k": {
+            "en": "Use",
+            "zh": "用途"
+          },
+          "v": {
+            "en": "Travel, Home, Picnic, Commercial, Camping",
+            "zh": "旅行、家用、野餐、商用、露营"
+          }
+        },
+        {
+          "g": "packaging",
+          "k": {
+            "en": "Selling Units",
+            "zh": "销售单位"
+          },
+          "v": {
+            "en": "Single item",
+            "zh": "单件"
+          }
+        },
+        {
+          "g": "packaging",
+          "k": {
+            "en": "Single Package Size",
+            "zh": "单件包装尺寸"
+          },
+          "v": {
+            "en": "153x37x49 cm",
+            "zh": "153x37x49 厘米"
+          }
+        },
+        {
+          "g": "packaging",
+          "k": {
+            "en": "Single Gross Weight",
+            "zh": "单件毛重"
+          },
+          "v": {
+            "en": "16.100 kg",
+            "zh": "16.100 千克"
+          }
+        },
+        {
+          "g": "packaging",
+          "k": {
+            "en": "Delivery Time",
+            "zh": "交货时间"
+          },
+          "v": {
+            "en": "31 Days",
+            "zh": "31 天"
+          }
+        }
+      ],
       "desc": {
         "en": "",
         "zh": ""
@@ -1327,6 +1780,6 @@
       }
     }
   ],
-  "_updated": "2026-06-25T18:42:05.341612+00:00",
+  "_updated": "2026-06-26T00:52:54.462237+00:00",
   "_schema": "v4-full-bilingual"
 }
