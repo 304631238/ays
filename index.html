@@ -190,6 +190,11 @@ const I18N={
   addBrand:{en:"+ Add brand item",zh:"+ 新增品牌项"},
   back:{en:"← Back to products",zh:"← 返回产品列表"},
   specs:{en:"Specifications",zh:"规格参数"},
+  basicInfo:{en:"Basic Info.",zh:"基本信息"},
+  packaging:{en:"Packaging & Delivery",zh:"包装与配送"},
+  grpBasic:{en:"Basic Info",zh:"基本信息"},
+  grpPack:{en:"Packaging",zh:"包装配送"},
+  grpDesc:{en:"Description params",zh:"描述参数"},
   desc:{en:"Description",zh:"产品描述"},
   video:{en:"Product Video",zh:"产品视频"},
   noSpec:{en:"No specifications yet.",zh:"暂无规格参数。"},
@@ -382,11 +387,30 @@ function renderDetail(){
       </div>
       <div style="font-size:18px;color:var(--warn);font-weight:700;margin-bottom:4px">${esc(p.price||T('inquiry'))}</div>
       <div style="color:var(--txt2);font-size:13px;margin-bottom:18px">${T('moq')}: ${esc(p.moq||'-')}</div>
-      <h3 style="font-size:15px;color:var(--accent2);margin-bottom:8px">${T('specs')}</h3>
-      ${specs.length?`<table class="spectable">${specs.map(s=>`<tr><td class="k">${esc(L(s.k))}</td><td>${esc(L(s.v))}</td></tr>`).join("")}</table>`:`<div class="empty">${T('noSpec')}</div>`}
-      <h3 style="font-size:15px;color:var(--accent2);margin:18px 0 8px">${T('desc')}</h3>
-      <div class="a" style="white-space:pre-wrap;font-size:14px">${esc(L(p.desc))||`<span style="color:var(--txt2)">${T('noDesc')}</span>`}</div>
     </div>
+  </div>
+  ${detailSections(p,specs)}`;
+}
+/* 阿里三段式：Basic Info / Packaging & Delivery / Product Description */
+function specTable(rows){
+  if(!rows.length)return `<div class="empty">${T('noSpec')}</div>`;
+  return `<table class="spectable">${rows.map(s=>`<tr><td class="k">${esc(L(s.k))}</td><td>${esc(L(s.v))}</td></tr>`).join("")}</table>`;
+}
+function detailSections(p,specs){
+  const basic=specs.filter(s=>(s.g||"basic")==="basic");
+  const pack=specs.filter(s=>s.g==="packaging");
+  const descSpec=specs.filter(s=>s.g==="desc");
+  return `<div style="margin-top:30px">
+    <h3 style="font-size:18px;margin-bottom:4px">${T('basicInfo')}</h3>
+    <div style="width:40px;height:3px;background:var(--accent);border-radius:3px;margin-bottom:14px"></div>
+    ${specTable(basic)}
+    <h3 style="font-size:18px;margin:28px 0 4px">${T('packaging')}</h3>
+    <div style="width:40px;height:3px;background:var(--accent);border-radius:3px;margin-bottom:14px"></div>
+    ${specTable(pack)}
+    <h3 style="font-size:18px;margin:28px 0 4px">${T('desc')}</h3>
+    <div style="width:40px;height:3px;background:var(--accent);border-radius:3px;margin-bottom:14px"></div>
+    <div class="a" style="white-space:pre-wrap;font-size:14px;margin-bottom:14px">${esc(L(p.desc))||`<span style="color:var(--txt2)">${T('noDesc')}</span>`}</div>
+    ${descSpec.length?specTable(descSpec):''}
   </div>`;
 }
 function setDetailImg(i){DETAIL_IMG=i;const m=document.getElementById("mainImg");if(m)m.src=DB.products.find(x=>String(x.id)===String(CUR_PID)).images[i];document.querySelectorAll(".thumbs .t").forEach((t,idx)=>t.classList.toggle("on",idx===i));}
@@ -489,14 +513,16 @@ function openEdit(type,id){
   const m=document.getElementById("editModal");m.innerHTML=html;m.classList.add("show");
 }
 function specEditRows(){
+  const opt=(g)=>`<option value="basic"${g==='basic'?' selected':''}>${T('grpBasic')}</option><option value="packaging"${g==='packaging'?' selected':''}>${T('grpPack')}</option><option value="desc"${g==='desc'?' selected':''}>${T('grpDesc')}</option>`;
   return EDIT_SPECS.map((s,i)=>`<div class="speceditrow">
+    <select style="flex:0 0 110px" onchange="EDIT_SPECS[${i}].g=this.value">${opt(s.g||'basic')}</select>
     <input value="${esc(L(s.k))}" placeholder="${LANG==='zh'?'参数名':'name'}" oninput="EDIT_SPECS[${i}].k=mkbl(this.value,EDIT_SPECS[${i}].k)">
     <input value="${esc(L(s.v))}" placeholder="${LANG==='zh'?'参数值':'value'}" oninput="EDIT_SPECS[${i}].v=mkbl(this.value,EDIT_SPECS[${i}].v)">
     <button class="rm" onclick="EDIT_SPECS.splice(${i},1);document.getElementById('specEdit').innerHTML=specEditRows()">×</button>
   </div>`).join("")||`<div style="color:var(--txt2);font-size:12px;margin-bottom:8px">${T('noSpec')}</div>`;
 }
 function mkbl(val,old){const o=(old&&typeof old==="object")?old:{en:"",zh:""};o[LANG]=val;if(!o[LANG==='en'?'zh':'en'])o[LANG==='en'?'zh':'en']=val;return o;}
-function addSpecRow(){EDIT_SPECS.push({k:{en:"",zh:""},v:{en:"",zh:""}});document.getElementById("specEdit").innerHTML=specEditRows();}
+function addSpecRow(){EDIT_SPECS.push({g:"basic",k:{en:"",zh:""},v:{en:"",zh:""}});document.getElementById("specEdit").innerHTML=specEditRows();}
 function closeEdit(){const m=document.getElementById("editModal");m.classList.remove("show");m.innerHTML="";EDIT_TYPE=EDIT_ID=null;EDIT_SPECS=[];}
 async function saveEdit(){
   const type=EDIT_TYPE,sc=SCHEMA[type];const obj={};
