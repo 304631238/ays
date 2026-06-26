@@ -411,7 +411,28 @@ function detailSections(p,specs){
     <div style="width:40px;height:3px;background:var(--accent);border-radius:3px;margin-bottom:14px"></div>
     <div class="a" style="white-space:pre-wrap;font-size:14px;margin-bottom:14px">${esc(L(p.desc))||`<span style="color:var(--txt2)">${T('noDesc')}</span>`}</div>
     ${descSpec.length?specTable(descSpec):''}
+    ${detailImagesBlock(p)}
   </div>`;
+}
+/* 产品描述详情长图：客户可见；后台可上传/删除 */
+function detailImagesBlock(p){
+  const di=p.detailImgs||[];
+  let html="";
+  if(di.length){
+    html+=`<div style="margin-top:18px;display:flex;flex-direction:column;gap:10px;align-items:center">`+
+      di.map((im,i)=>`<div style="position:relative;width:100%;max-width:790px">
+        <img src="${esc(im)}" style="width:100%;border-radius:8px;display:block" loading="lazy" onerror="this.style.opacity=.3">
+        ${isAdmin()?`<span onclick="delDetailImg(${i})" style="position:absolute;top:8px;right:8px;background:var(--danger);color:#fff;width:26px;height:26px;line-height:26px;text-align:center;border-radius:6px;cursor:pointer">×</span>`:''}
+      </div>`).join("")+`</div>`;
+  }
+  if(isAdmin()){
+    html+=`<div style="margin-top:14px">
+      <input type="file" id="detailImgFile" accept="image/*" multiple style="display:none" onchange="uploadDetailImg(this)">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('detailImgFile').click()">${LANG==='zh'?'+ 上传详情图（可多选）':'+ Upload detail images'}</button>
+      <input id="detailImgUrl" placeholder="${LANG==='zh'?'或粘贴图片链接后回车':'or paste image URL + Enter'}" style="margin-top:8px;width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:8px" onkeydown="if(event.key==='Enter')addDetailImgUrl(this.value)">
+    </div>`;
+  }
+  return html;
 }
 function setDetailImg(i){DETAIL_IMG=i;const m=document.getElementById("mainImg");if(m)m.src=DB.products.find(x=>String(x.id)===String(CUR_PID)).images[i];document.querySelectorAll(".thumbs .t").forEach((t,idx)=>t.classList.toggle("on",idx===i));}
 function openDetail(pid){CUR_PID=pid;DETAIL_IMG=0;CUR="detail";buildNav();document.getElementById("main").innerHTML=renderDetail();window.scrollTo({top:0,behavior:"smooth"});}
@@ -455,6 +476,29 @@ async function uploadImg(input){
 }
 function addImgUrl(url){url=url.trim();if(!url)return;const p=DB.products.find(x=>String(x.id)===String(CUR_PID));p.images=p.images||[];p.images.push(url);saveDB("Add image url to "+CUR_PID).then(ok=>{if(ok)document.getElementById("main").innerHTML=renderDetail();});}
 async function delProductImg(i){const p=DB.products.find(x=>String(x.id)===String(CUR_PID));if(!confirm("Delete this image?"))return;p.images.splice(i,1);if(DETAIL_IMG>=p.images.length)DETAIL_IMG=0;if(await saveDB("Remove image from "+CUR_PID))document.getElementById("main").innerHTML=renderDetail();}
+
+/* ===== DETAIL IMAGES (product description long images) ===== */
+async function uploadDetailImg(input){
+  const files=Array.from(input.files||[]);if(!files.length)return;
+  const p=DB.products.find(x=>String(x.id)===String(CUR_PID));p.detailImgs=p.detailImgs||[];
+  for(const file of files){
+    if(file.size>5*1024*1024){toast((file.name||"image")+": >5MB skipped",true);continue;}
+    toast(T('uploading'));
+    try{
+      const b64=await new Promise((rs,rj)=>{const r=new FileReader();r.onload=()=>rs(r.result.split(",")[1]);r.onerror=rj;r.readAsDataURL(file);});
+      const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
+      const path=`images/${CUR_PID}_detail_${Date.now()}_${Math.floor(Math.random()*999)}.${ext}`;
+      const api=`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${path}`;
+      const res=await fetch(api,{method:"PUT",headers:{Authorization:"token "+token(),Accept:"application/vnd.github+json","Content-Type":"application/json"},
+        body:JSON.stringify({message:"Upload detail image "+path,content:b64,branch:GH_BRANCH})});
+      if(!res.ok)throw new Error((await res.json()).message||res.status);
+      p.detailImgs.push(`https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/${path}`);
+    }catch(e){toast("Upload failed: "+e.message,true);}
+  }
+  if(await saveDB("Add detail images to "+CUR_PID))document.getElementById("main").innerHTML=renderDetail();
+}
+function addDetailImgUrl(url){url=url.trim();if(!url)return;const p=DB.products.find(x=>String(x.id)===String(CUR_PID));p.detailImgs=p.detailImgs||[];p.detailImgs.push(url);saveDB("Add detail image url to "+CUR_PID).then(ok=>{if(ok)document.getElementById("main").innerHTML=renderDetail();});}
+async function delDetailImg(i){const p=DB.products.find(x=>String(x.id)===String(CUR_PID));if(!confirm(LANG==='zh'?'删除这张详情图？':'Delete this image?'))return;p.detailImgs.splice(i,1);if(await saveDB("Remove detail image from "+CUR_PID))document.getElementById("main").innerHTML=renderDetail();}
 
 /* ===== EDIT MODAL ===== */
 /* 字段定义：bl=双语(存{en,zh}), s=单值字符串 */
@@ -556,7 +600,7 @@ async function saveEdit(){
     }else{obj[f.k]=fld("ef_"+f.k);}
   }
   if(sc.hasSpecs)obj.specs=EDIT_SPECS.filter(s=>(L(s.v)||"").trim()!=="");
-  if(type==="products"){obj.images=EDIT_ID?(DB.products.find(x=>String(x.id)===String(EDIT_ID)).images||[]):[];}
+  if(type==="products"){const ex=EDIT_ID?DB.products.find(x=>String(x.id)===String(EDIT_ID)):null;obj.images=ex?(ex.images||[]):[];obj.detailImgs=ex?(ex.detailImgs||[]):[];}
   const btn=document.getElementById("editSaveBtn");if(btn){btn.disabled=1;btn.textContent="…";}
   let msg;
   if(EDIT_ID){Object.assign(DB[type].find(x=>String(x.id)===String(EDIT_ID)),obj);msg="Edit "+type;}
